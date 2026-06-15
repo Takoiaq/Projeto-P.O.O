@@ -1,9 +1,11 @@
+import java.time.LocalDate;
+
 public class Emprestimo {
 
     private Livro livro;
     private Usuario usuario;
-    private localDate dataEmprestimo;
-    private localDate dataDevolucao;
+    private LocalDate dataEmprestimo;
+    private LocalDate dataDevolucao;
 
 public Emprestimo(Livro livro, Usuario usuario, LocalDate dataEmprestimo, LocalDate dataDevolucao) {
     this.livro = livro; 

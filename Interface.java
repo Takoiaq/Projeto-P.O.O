@@ -1,4 +1,4 @@
-public interface Biblioteca{
+public interface Interface {
 
     void cadastrarLivro(Livro livro);
     void cadastrarUsuario(Usuario usuario);
