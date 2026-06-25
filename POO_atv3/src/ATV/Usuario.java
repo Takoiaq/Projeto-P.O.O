@@ -1,9 +1,9 @@
 package ATV;
 
-public class Usuario implements DadosEntidade {
-    private int id; 
-    private String nome; 
-    private String email;
+public abstract class Usuario implements DadosEntidade {
+    protected int id; 
+    protected String nome; 
+    protected String email;
 
     public Usuario(int id, String nome, String email) {
         this.id = id;
@@ -15,28 +15,31 @@ public class Usuario implements DadosEntidade {
     public int getId() { 
         return id; 
     }
+
+    public void setId(int id) {
+        this.id = id;
+    }
     
     public String getNome() { 
         return nome; 
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
     }
     
     public String getEmail() { 
         return email; 
     }
 
-    public int getPrazoEmprestimo() {
-        return 7;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    public String toCsv() {
-        String tipo = "USUARIO";
-        if (this instanceof Estudante) {
-            tipo = "ESTUDANTE";
-        } else if (this instanceof Professor) {
-            tipo = "PROFESSOR";
-        }
-        return tipo + ";" + id + ";" + nome + ";" + email;
-    } 
+    // O polimorfismo puro: as subclasses Estudante e Professor são obrigadas a implementar as regras abaixo
+    public abstract int getPrazoEmprestimo();
+
+    public abstract String toCsv();
 
     @Override
     public String toString() {

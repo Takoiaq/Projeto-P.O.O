@@ -12,6 +12,11 @@ public class Professor extends Usuario {
     }
 
     @Override
+    public String toCsv() {
+        return "PROFESSOR;" + id + ";" + nome + ";" + email;
+    }
+
+    @Override
     public String toString() {
         return "Professor [ID: " + getId() + " | Nome: " + getNome() + " | Email: " + getEmail() + "]";
     }
