@@ -1,4 +1,3 @@
-// Emprestimo.java
 package ATV;
 
 import java.time.LocalDate;
@@ -16,12 +15,22 @@ public class Emprestimo {
         this.dataPrev = dataPrev;
     }
 
-    public Livro getLivro() { return livro; }
-    public Usuario getUsuario() { return usuario; }
-    public LocalDate getDataEmp() { return dataEmp; }
-    public LocalDate getDatadev() { return dataPrev; } // apareceu deu bom
+    public Livro getLivro() { 
+        return livro; 
+    }
+    
+    public Usuario getUsuario() { 
+        return usuario; 
+    }
+    
+    public LocalDate getDataEmp() { 
+        return dataEmp; 
+    }
+    
+    public LocalDate getDatadev() { 
+        return dataPrev; 
+    }
 
-    // O método toCsv é o salvamento de emprestimos no arquivo CSV
     public String toCsv() {
         return livro.getCodigo() + ";" + usuario.getId() + ";" + dataEmp + ";" + dataPrev;
     }

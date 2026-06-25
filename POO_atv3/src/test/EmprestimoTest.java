@@ -17,7 +17,7 @@ public class EmprestimoTest {
 
     @BeforeEach
     public void setUp() {
-        // 1. Cria o livro usando o construtor real que você mandou antes
+        // 1. Cria o livro usando o construtor
         livro = new Livro(1, "Dom Casmurro", "Machado de Assis", 1899, true);
 
         usuario = new Usuario(1, "João Souza", "joao@ufc.br");

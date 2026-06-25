@@ -10,7 +10,7 @@ public class LivroTest {
 
     @BeforeEach
     public void setUp() {
-        // Usa o construtor real da sua classe: codigo, titulo, autor, anop, disp
+        // Usa o construtor da classe: codigo, titulo, autor, anop, disp
         livro = new Livro(1, "Dom Casmurro", "Machado de Assis", 1899, true);
     }
 
