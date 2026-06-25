@@ -1,2 +1,2 @@
-1;Alto da compadecida;Joao Grilo e Chico;2013;false
-2;movimento comunista;lula;2014;false
+1;Alto da compadecida;Joao Grilo e Chico;2013;11
+2;movimento comunista;lula;2014;0

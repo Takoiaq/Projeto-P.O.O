@@ -157,6 +157,13 @@ public class Biblioteca {
         Livro livro = buscarLivroPorCodigo(codigoLivro);
         Usuario usuario = buscarUsuarioPorId(idUsuario);
 
+        if (usuarioJaPegouEsseLivro(idUsuario, codigoLivro)) {
+            throw new LivroIndisponivelException(
+                    "Este usuário já possui um empréstimo ativo deste livro. " +
+                    "Ele precisa devolver antes de pegar outro exemplar do mesmo ID."
+            );
+        }
+
         if (!livro.isDisp()) {
             throw new LivroIndisponivelException(
                     "O livro '" + livro.getTitulo() + "' não possui unidades disponíveis."
@@ -173,6 +180,17 @@ public class Biblioteca {
 
         System.out.println("Empréstimo realizado com sucesso! Devolução até: " + dataPrevistaDevolucao);
         System.out.println("Quantidade restante do livro: " + livro.getQuantidade());
+    }
+
+    private boolean usuarioJaPegouEsseLivro(int idUsuario, int codigoLivro) {
+        for (Emprestimo emprestimo : emprestimos) {
+            if (emprestimo.getUsuario().getId() == idUsuario &&
+                    emprestimo.getLivro().getCodigo() == codigoLivro) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public void realizarDevolucao(int codigoLivro) throws LivroNaoEncontradoException {
@@ -308,5 +326,56 @@ public class Biblioteca {
         }
 
         System.out.println("----------------------------------------");
+    }
+
+    public void adicionarQuantidadeLivro(int codigoLivro, int quantidade)
+            throws LivroNaoEncontradoException {
+
+        if (codigoLivro < 0) {
+            throw new LivroNaoEncontradoException("Código do livro não pode ser negativo.");
+        }
+
+        if (quantidade <= 0) {
+            System.out.println("[Erro] A quantidade para adicionar deve ser maior que zero.");
+            return;
+        }
+
+        Livro livro = buscarLivroPorCodigo(codigoLivro);
+
+        int novaQuantidade = livro.getQuantidade() + quantidade;
+        livro.setQuantidade(novaQuantidade);
+
+        System.out.println("Quantidade adicionada com sucesso!");
+        System.out.println("Livro: " + livro.getTitulo());
+        System.out.println("Quantidade atual disponível: " + livro.getQuantidade());
+    }
+
+    public void removerQuantidadeLivro(int codigoLivro, int quantidade)
+            throws LivroNaoEncontradoException {
+
+        if (codigoLivro < 0) {
+            throw new LivroNaoEncontradoException("Código do livro não pode ser negativo.");
+        }
+
+        if (quantidade <= 0) {
+            System.out.println("[Erro] A quantidade para remover deve ser maior que zero.");
+            return;
+        }
+
+        Livro livro = buscarLivroPorCodigo(codigoLivro);
+
+        if (quantidade > livro.getQuantidade()) {
+            System.out.println("[Erro] Não é possível remover mais livros do que a quantidade disponível.");
+            System.out.println("Livro: " + livro.getTitulo());
+            System.out.println("Quantidade atual disponível: " + livro.getQuantidade());
+            return;
+        }
+
+        int novaQuantidade = livro.getQuantidade() - quantidade;
+        livro.setQuantidade(novaQuantidade);
+
+        System.out.println("Quantidade removida com sucesso!");
+        System.out.println("Livro: " + livro.getTitulo());
+        System.out.println("Quantidade atual disponível: " + livro.getQuantidade());
     }
 }

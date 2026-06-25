@@ -101,6 +101,7 @@ public class Main {
                 System.out.println("9. Gravar Dados Agora");
                 System.out.println("10. Logout (Trocar de Usuário)");
                 System.out.println("11. Cadastrar Novo Usuário");
+                System.out.println("12. Alterar Quantidade de Livro");
                 System.out.println("0. Salvar e Sair");
                 System.out.print("Escolha uma opção: ");
 
@@ -125,7 +126,6 @@ public class Main {
                             int quantidade = lerIntNaoNegativo(sc, "Quantidade do livro");
 
                             biblioteca.cadastrarLivro(new Livro(cod, tit, aut, ano, quantidade));
-
                         }
 
                         case 2 -> {
@@ -193,6 +193,31 @@ public class Main {
                                     biblioteca.cadastrarUsuario(new Estudante(id, nome, email));
                                 } else {
                                     biblioteca.cadastrarUsuario(new Bibliotecario(id, nome, email));
+                                }
+                            }
+                        }
+
+                        case 12 -> {
+                            System.out.println("\n--- ALTERAR QUANTIDADE DE LIVRO ---");
+                            System.out.println("1. Adicionar quantidade");
+                            System.out.println("2. Remover quantidade");
+                            System.out.print("Escolha uma opção: ");
+
+                            int tipoAlteracao = lerInt(sc);
+
+                            if (tipoAlteracao != 1 && tipoAlteracao != 2) {
+                                System.out.println("[Erro] Opção inválida! Digite somente 1 ou 2.");
+                            } else {
+                                System.out.print("Código do Livro: ");
+                                int codigoLivro = lerIntNaoNegativo(sc, "Código do livro");
+
+                                System.out.print("Quantidade: ");
+                                int quantidade = lerIntNaoNegativo(sc, "Quantidade do livro");
+
+                                if (tipoAlteracao == 1) {
+                                    biblioteca.adicionarQuantidadeLivro(codigoLivro, quantidade);
+                                } else {
+                                    biblioteca.removerQuantidadeLivro(codigoLivro, quantidade);
                                 }
                             }
                         }
