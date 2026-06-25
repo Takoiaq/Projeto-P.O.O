@@ -21,7 +21,7 @@ import ATV.Biblioteca;
 import ATV.Estudante;
 import ATV.Livro;
 import ATV.Persistencia;
-import ATV.Professor;
+import ATV.Bibliotecario;
 import ATV.Usuario;
 
 import ATV.Exception.ArquivoInvalidoException;
@@ -85,7 +85,7 @@ public class BibliotecaTest {
     @Test
     void deveValidarPrazoDiferenciadoPolimorfismo() {
         Usuario estudante = new Estudante(1, "Aluno", "aluno@email.com");
-        Usuario professor = new Professor(2, "Docente", "docente@email.com");
+        Usuario professor = new Bibliotecario(2, "Docente", "docente@email.com");
 
         assertEquals(7, estudante.getPrazoEmprestimo());
         assertEquals(14, professor.getPrazoEmprestimo());
@@ -151,7 +151,7 @@ public class BibliotecaTest {
 
         assertEquals("Livro Carregado", livroCarregado.getTitulo());
         assertEquals("Usuario Arquivo", usuarioCarregado.getNome());
-        assertTrue(usuarioCarregado instanceof Professor);
+        assertTrue(usuarioCarregado instanceof Bibliotecario);
         assertEquals(14, usuarioCarregado.getPrazoEmprestimo());
         assertFalse(livroCarregado.isDisp());
 
@@ -185,7 +185,7 @@ public class BibliotecaTest {
     void deveLancarExcecaoQuandoLivroEstiverIndisponivel() throws Exception {
         Livro livro = new Livro(4, "Dom Casmurro", "Machado de Assis", 1899, true);
         Usuario usuario1 = new Estudante(1, "Machado", "machado@email.com");
-        Usuario usuario2 = new Professor(2, "Alencar", "alencar@email.com");
+        Usuario usuario2 = new Bibliotecario(2, "Alencar", "alencar@email.com");
 
         biblioteca.cadastrarLivro(livro);
         biblioteca.cadastrarUsuario(usuario1);
@@ -210,7 +210,7 @@ public class BibliotecaTest {
     @Test
     void deveAvisarQuandoIdDeUsuarioJaExistir() throws UsuarioNaoEncontradoException {
         Usuario usuarioOriginal = new Estudante(1, "Roberty", "roberty@email.com");
-        Usuario usuarioDuplicado = new Professor(1, "Outro Nome", "outro@email.com");
+        Usuario usuarioDuplicado = new Bibliotecario(1, "Outro Nome", "outro@email.com");
 
         ByteArrayOutputStream saida = new ByteArrayOutputStream();
         PrintStream saidaOriginal = System.out;
@@ -255,7 +255,7 @@ public class BibliotecaTest {
 
         assertEquals("Livro Carregado", livroCarregado.getTitulo());
         assertEquals("Usuario Arquivo", usuarioCarregado.getNome());
-        assertTrue(usuarioCarregado instanceof Professor);
+        assertTrue(usuarioCarregado instanceof Bibliotecario);
         assertFalse(livroCarregado.isDisp());
     }
 }

@@ -50,16 +50,13 @@ public class Main {
                         case 2 -> {
                             System.out.println("\n--- Tipo de Cadastro ---");
                             System.out.println("1. Estudante");
-                            System.out.println("2. Professor");
+                            System.out.println("2. Bibliotecário");
                             System.out.print("Escolha o tipo: ");
 
                             int tipo = lerInt(sc);
 
-                            // MUDANÇA:
-                            // Agora, se o usuário digitar algo diferente de 1 ou 2,
-                            // aparece a mensagem de erro e o cadastro não continua.
                             if (tipo != 1 && tipo != 2) {
-                                System.out.println("[Erro] Tipo inválido! Digite somente 1 para Estudante ou 2 para Professor.");
+                                System.out.println("[Erro] Tipo inválido! Digite somente 1 para Estudante ou 2 para Bibliotecário.");
                             } else {
                                 System.out.print("ID do Usuário (int): ");
                                 int id = lerInt(sc);
@@ -73,7 +70,7 @@ public class Main {
                                 if (tipo == 1) {
                                     biblioteca.cadastrarUsuario(new Estudante(id, nome, email));
                                 } else {
-                                    biblioteca.cadastrarUsuario(new Professor(id, nome, email));
+                                    biblioteca.cadastrarUsuario(new Bibliotecario(id, nome, email));
                                 }
                             }
                         }
@@ -94,8 +91,8 @@ public class Main {
                     System.out.println("[Erro] " + e.getMessage());
                 }
 
-            } else if (usuarioLogado instanceof Professor) {
-                System.out.println("\n===== MENU DOCENTE (PROFESSOR) =====");
+            } else if (usuarioLogado instanceof Bibliotecario) {
+                System.out.println("\n===== MENU BIBLIOTECÁRIO =====");
                 System.out.println("1. Cadastrar Livro");
                 System.out.println("2. Buscar Usuário por ID");
                 System.out.println("3. Buscar Usuário por Nome");

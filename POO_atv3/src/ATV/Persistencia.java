@@ -70,8 +70,8 @@ public class Persistencia {
 
     private void salvarLivros(List<Livro> livros) throws IOException {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(arqLivros))) {
-            for (Livro l : livros) {
-                bw.write(l.toCsv());
+            for (Livro livro : livros) {
+                bw.write(livro.toCsv());
                 bw.newLine();
             }
         }
@@ -79,8 +79,8 @@ public class Persistencia {
 
     private void salvarUsuarios(List<Usuario> usuarios) throws IOException {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(arqUsuarios))) {
-            for (Usuario u : usuarios) {
-                bw.write(u.toCsv());
+            for (Usuario usuario : usuarios) {
+                bw.write(usuario.toCsv());
                 bw.newLine();
             }
         }
@@ -88,8 +88,8 @@ public class Persistencia {
 
     private void salvarEmprestimos(List<Emprestimo> emprestimos) throws IOException {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(arqEmprestimos))) {
-            for (Emprestimo e : emprestimos) {
-                bw.write(e.toCsv());
+            for (Emprestimo emprestimo : emprestimos) {
+                bw.write(emprestimo.toCsv());
                 bw.newLine();
             }
         }
@@ -103,14 +103,14 @@ public class Persistencia {
         }
 
         try (BufferedReader br = new BufferedReader(new FileReader(arqLivros))) {
-            String ln;
+            String linha;
 
-            while ((ln = br.readLine()) != null) {
-                if (ln.isBlank()) {
+            while ((linha = br.readLine()) != null) {
+                if (linha.isBlank()) {
                     continue;
                 }
 
-                String[] tokens = ln.split(";", -1);
+                String[] tokens = linha.split(";", -1);
                 validarTokens(tokens, 5, "livros.txt");
 
                 int codigo = Integer.parseInt(tokens[0].trim());
@@ -134,14 +134,14 @@ public class Persistencia {
         }
 
         try (BufferedReader br = new BufferedReader(new FileReader(arqUsuarios))) {
-            String ln;
+            String linha;
 
-            while ((ln = br.readLine()) != null) {
-                if (ln.isBlank()) {
+            while ((linha = br.readLine()) != null) {
+                if (linha.isBlank()) {
                     continue;
                 }
 
-                String[] tokens = ln.split(";", -1);
+                String[] tokens = linha.split(";", -1);
                 validarTokens(tokens, 4, "usuarios.txt");
 
                 String tipo = tokens[0].trim().toUpperCase();
@@ -151,8 +151,8 @@ public class Persistencia {
 
                 if (tipo.equals("ESTUDANTE")) {
                     lista.add(new Estudante(id, nome, email));
-                } else if (tipo.equals("PROFESSOR")) {
-                    lista.add(new Professor(id, nome, email));
+                } else if (tipo.equals("BIBLIOTECARIO")) {
+                    lista.add(new Bibliotecario(id, nome, email));
                 } else {
                     throw new ArquivoInvalidoException("Tipo de usuário inválido em usuarios.txt: " + tipo);
                 }
@@ -172,14 +172,14 @@ public class Persistencia {
         }
 
         try (BufferedReader br = new BufferedReader(new FileReader(arqEmprestimos))) {
-            String ln;
+            String linha;
 
-            while ((ln = br.readLine()) != null) {
-                if (ln.isBlank()) {
+            while ((linha = br.readLine()) != null) {
+                if (linha.isBlank()) {
                     continue;
                 }
 
-                String[] tokens = ln.split(";", -1);
+                String[] tokens = linha.split(";", -1);
                 validarTokens(tokens, 4, "emprestimos.txt");
 
                 int codigoLivro = Integer.parseInt(tokens[0].trim());
@@ -223,9 +223,9 @@ public class Persistencia {
     }
 
     private Livro acharLivro(List<Livro> livros, int codigo) {
-        for (Livro l : livros) {
-            if (l.getCodigo() == codigo) {
-                return l;
+        for (Livro livro : livros) {
+            if (livro.getCodigo() == codigo) {
+                return livro;
             }
         }
 
@@ -233,9 +233,9 @@ public class Persistencia {
     }
 
     private Usuario acharUsuario(List<Usuario> usuarios, int id) {
-        for (Usuario u : usuarios) {
-            if (u.getId() == id) {
-                return u;
+        for (Usuario usuario : usuarios) {
+            if (usuario.getId() == id) {
+                return usuario;
             }
         }
 

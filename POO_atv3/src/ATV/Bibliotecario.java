@@ -1,8 +1,8 @@
 package ATV;
 
-public class Professor extends Usuario {
+public class Bibliotecario extends Usuario {
 
-    public Professor(int id, String nome, String email) {
+    public Bibliotecario(int id, String nome, String email) {
         super(id, nome, email);
     }
 
@@ -13,11 +13,11 @@ public class Professor extends Usuario {
 
     @Override
     public String toCsv() {
-        return "PROFESSOR;" + id + ";" + nome + ";" + email;
+        return "BIBLIOTECARIO;" + id + ";" + nome + ";" + email;
     }
 
     @Override
     public String toString() {
-        return "Professor [ID: " + getId() + " | Nome: " + getNome() + " | Email: " + getEmail() + "]";
+        return "Bibliotecário [ID: " + getId() + " | Nome: " + getNome() + " | Email: " + getEmail() + "]";
     }
 }

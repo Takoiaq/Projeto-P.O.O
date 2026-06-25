@@ -1,33 +1,34 @@
 package test;
 
-import ATV.Professor;
+import ATV.Bibliotecario;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ProfessorTest {
-    private Professor professor;
+public class BibliotecarioTest {
+    private Bibliotecario bibliotecario;
 
     @BeforeEach
     public void setUp() {
-        professor = new Professor(30, "Robertty Costa", "robertty@ufc.br");
+        bibliotecario = new Bibliotecario(30, " Robertty Costa ", " robertty@ufc.br ");
     }
 
     @Test
-    public void testCriacaoProfessor() {
-        assertEquals(30, professor.getId());
-        assertEquals("Robertty Costa", professor.getNome());
-        assertEquals("robertty@ufc.br", professor.getEmail());
+    public void testCriacaoBibliotecario() {
+        assertEquals(30, bibliotecario.getId());
+        assertEquals("Robertty Costa", bibliotecario.getNome());
+        assertEquals("robertty@ufc.br", bibliotecario.getEmail());
     }
 
     @Test
-    public void testPrazoEmprestimoProfessor() {
-        assertEquals(14, professor.getPrazoEmprestimo());
+    public void testPrazoEmprestimoBibliotecario() {
+        assertEquals(14, bibliotecario.getPrazoEmprestimo());
     }
 
     @Test
-    public void testToCsvProfessor() {
-        String esperado = "PROFESSOR;30;Robertty Costa;robertty@ufc.br";
-        assertEquals(esperado, professor.toCsv());
+    public void testToCsvBibliotecario() {
+        String esperado = "BIBLIOTECARIO;30;Robertty Costa;robertty@ufc.br";
+        assertEquals(esperado, bibliotecario.toCsv());
     }
 }
