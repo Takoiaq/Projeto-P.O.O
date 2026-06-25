@@ -39,6 +39,16 @@ public class Biblioteca {
     }
 
     public void cadastrarLivro(Livro livro) {
+        if (livro == null) {
+            System.out.println("[Erro] Livro inválido.");
+            return;
+        }
+
+        if (livro.getCodigo() < 0) {
+            System.out.println("[Erro] Código do livro não pode ser negativo.");
+            return;
+        }
+
         try {
             buscarLivroPorCodigo(livro.getCodigo());
             System.out.println("[Erro] Este código de livro já está sendo usado / já existe no sistema.");
@@ -49,6 +59,16 @@ public class Biblioteca {
     }
 
     public void cadastrarUsuario(Usuario usuario) {
+        if (usuario == null) {
+            System.out.println("[Erro] Usuário inválido.");
+            return;
+        }
+
+        if (usuario.getId() < 0) {
+            System.out.println("[Erro] ID de usuário não pode ser negativo.");
+            return;
+        }
+
         try {
             buscarUsuarioPorId(usuario.getId());
             System.out.println("[Erro] Este ID de usuário já está sendo usado / já existe no sistema.");
@@ -59,11 +79,16 @@ public class Biblioteca {
     }
 
     public Usuario buscarUsuarioPorId(int id) throws UsuarioNaoEncontradoException {
+        if (id < 0) {
+            throw new UsuarioNaoEncontradoException("ID de usuário não pode ser negativo.");
+        }
+
         for (Usuario usuario : usuarios) {
             if (usuario.getId() == id) {
                 return usuario;
             }
         }
+
         throw new UsuarioNaoEncontradoException("Usuário com ID " + id + " não existe no sistema.");
     }
 
@@ -84,11 +109,16 @@ public class Biblioteca {
     }
 
     public Livro buscarLivroPorCodigo(int codigo) throws LivroNaoEncontradoException {
+        if (codigo < 0) {
+            throw new LivroNaoEncontradoException("Código do livro não pode ser negativo.");
+        }
+
         for (Livro livro : livros) {
             if (livro.getCodigo() == codigo) {
                 return livro;
             }
         }
+
         throw new LivroNaoEncontradoException("Livro com código " + codigo + " não existe no sistema.");
     }
 
@@ -111,6 +141,14 @@ public class Biblioteca {
     public void realizarEmprestimo(int codigoLivro, int idUsuario)
             throws LivroNaoEncontradoException, UsuarioNaoEncontradoException, LivroIndisponivelException {
 
+        if (codigoLivro < 0) {
+            throw new LivroNaoEncontradoException("Código do livro não pode ser negativo.");
+        }
+
+        if (idUsuario < 0) {
+            throw new UsuarioNaoEncontradoException("ID de usuário não pode ser negativo.");
+        }
+
         Livro livro = buscarLivroPorCodigo(codigoLivro);
         Usuario usuario = buscarUsuarioPorId(idUsuario);
 
@@ -130,6 +168,10 @@ public class Biblioteca {
     }
 
     public void realizarDevolucao(int codigoLivro) throws LivroNaoEncontradoException {
+        if (codigoLivro < 0) {
+            throw new LivroNaoEncontradoException("Código do livro não pode ser negativo.");
+        }
+
         Livro livro = buscarLivroPorCodigo(codigoLivro);
         Emprestimo emprestimoEncontrado = null;
 
@@ -141,14 +183,14 @@ public class Biblioteca {
         }
 
         if (emprestimoEncontrado == null) {
-            System.out.println("Aviso: O livro '" + livro.getTitulo() + "' ja consta como disponivel no sistema.");
+            System.out.println("Aviso: O livro '" + livro.getTitulo() + "' já consta como disponível no sistema.");
             return;
         }
 
         emprestimoEncontrado.getLivro().setDisp(true);
         emprestimos.remove(emprestimoEncontrado);
 
-        System.out.println("Devolucao do livro '" + livro.getTitulo() + "' realizada com sucesso!");
+        System.out.println("Devolução do livro '" + livro.getTitulo() + "' realizada com sucesso!");
     }
 
     public void listarLivrosCadastrados() {
@@ -185,6 +227,11 @@ public class Biblioteca {
     }
 
     public void listarLivrosEmprestadosPorUsuario(int idUsuario) {
+        if (idUsuario < 0) {
+            System.out.println("[Erro] ID de usuário não pode ser negativo.");
+            return;
+        }
+
         boolean possui = false;
 
         for (Emprestimo emprestimo : emprestimos) {
@@ -195,7 +242,61 @@ public class Biblioteca {
         }
 
         if (!possui) {
-            System.out.println("Este usuário não possui empréstimos activos.");
+            System.out.println("Este usuário não possui empréstimos ativos.");
         }
+    }
+
+    public void listarUsuariosComEmprestimos() {
+        if (usuarios.isEmpty()) {
+            System.out.println("Nenhum usuário cadastrado.");
+            return;
+        }
+
+        System.out.println("\n===== USUÁRIOS CADASTRADOS E EMPRÉSTIMOS =====");
+
+        for (Usuario usuario : usuarios) {
+            String tipoUsuario;
+
+            if (usuario instanceof Bibliotecario) {
+                tipoUsuario = "Bibliotecário";
+            } else if (usuario instanceof Estudante) {
+                tipoUsuario = "Estudante";
+            } else {
+                tipoUsuario = "Usuário";
+            }
+
+            System.out.println("\n----------------------------------------");
+            System.out.println("Tipo: " + tipoUsuario);
+            System.out.println("ID: " + usuario.getId());
+            System.out.println("Nome: " + usuario.getNome());
+            System.out.println("Email: " + usuario.getEmail());
+            System.out.println("Prazo de empréstimo: " + usuario.getPrazoEmprestimo() + " dias");
+
+            boolean possuiEmprestimo = false;
+
+            for (Emprestimo emprestimo : emprestimos) {
+                if (emprestimo.getUsuario().getId() == usuario.getId()) {
+                    Livro livro = emprestimo.getLivro();
+
+                    if (!possuiEmprestimo) {
+                        System.out.println("Empréstimos:");
+                    }
+
+                    System.out.println("- Livro: " + livro.getTitulo());
+                    System.out.println("  Código: " + livro.getCodigo());
+                    System.out.println("  Autor: " + livro.getAutor());
+                    System.out.println("  Data do empréstimo: " + emprestimo.getDataEmp());
+                    System.out.println("  Devolução prevista: " + emprestimo.getDatadev());
+
+                    possuiEmprestimo = true;
+                }
+            }
+
+            if (!possuiEmprestimo) {
+                System.out.println("Empréstimos: nenhum empréstimo ativo.");
+            }
+        }
+
+        System.out.println("----------------------------------------");
     }
 }
