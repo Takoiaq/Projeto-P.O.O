@@ -131,13 +131,20 @@ public class Persistencia {
                 }
 
                 String[] tokens = ln.split(";", -1);
-                validarTokens(tokens, 3, "usuarios.txt");
+                validarTokens(tokens, 4, "usuarios.txt");
 
-                int id = Integer.parseInt(tokens[0]);
-                String nome = tokens[1];
-                String email = tokens[2];
+                String tipo = tokens[0];
+                int id = Integer.parseInt(tokens[1]);
+                String nome = tokens[2];
+                String email = tokens[3];
 
-                lista.add(new Usuario(id, nome, email));
+                if (tipo.equals("ESTUDANTE")) {
+                    lista.add(new Estudante(id, nome, email));
+                } else if (tipo.equals("PROFESSOR")) {
+                    lista.add(new Professor(id, nome, email));
+                } else {
+                    lista.add(new Usuario(id, nome, email));
+                }
             }
         }
         return lista;

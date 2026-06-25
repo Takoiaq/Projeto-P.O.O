@@ -113,7 +113,8 @@ public class Biblioteca {
 
         livro.setDisp(false);
         LocalDate dataEmprestimo = LocalDate.now();
-        LocalDate dataPrevistaDevolucao = dataEmprestimo.plusDays(7);
+        int diasPrazo = usuario.getPrazoEmprestimo();
+        LocalDate dataPrevistaDevolucao = dataEmprestimo.plusDays(diasPrazo);
 
         emprestimos.add(new Emprestimo(livro, usuario, dataEmprestimo, dataPrevistaDevolucao));
         System.out.println("Empréstimo realizado com sucesso! Devolução até: " + dataPrevistaDevolucao);

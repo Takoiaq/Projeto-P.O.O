@@ -18,101 +18,177 @@ public class Main {
             System.out.println("[Aviso] Iniciando sem registros prévios: " + e.getMessage());
         }
 
-        int opcao = -1;
-        while (opcao != 0) {
-            System.out.println("\n===== MENU BIBLIOTECA =====");
-            System.out.println("1. Cadastrar Livro");
-            System.out.println("2. Cadastrar Usuário");
-            System.out.println("3. Buscar Usuário por ID");
-            System.out.println("4. Buscar Usuário por Nome");
-            System.out.println("5. Buscar Livro por Código");
-            System.out.println("6. Buscar Livro por Autor");
-            System.out.println("7. Realizar Empréstimo");
-            System.out.println("8. Realizar Devolução");
-            System.out.println("9. Listar Todos os Livros");
-            System.out.println("10. Listar Livros Disponíveis");
-            System.out.println("11. Listar Livros Emprestados");
-            System.out.println("12. Listar Livros Emprestados por Usuário");
-            System.out.println("13. Gravar Dados Agora");
-            System.out.println("0. Salvar e Sair");
-            System.out.print("Escolha uma opção: ");
+        Usuario usuarioLogado = null;
+        int opcaoSessao = -1;
 
-            try {
-                opcao = Integer.parseInt(sc.nextLine());
-                switch (opcao) {
-                    case 1 -> {
-                        System.out.print("Código do Livro (int): "); 
-                        int cod = Integer.parseInt(sc.nextLine());
-                        System.out.print("Título: "); 
-                        String tit = sc.nextLine();
-                        System.out.print("Autor: "); 
-                        String aut = sc.nextLine();
-                        System.out.print("Ano de Publicação: "); 
-                        int ano = Integer.parseInt(sc.nextLine());
-                        biblioteca.cadastrarLivro(new Livro(cod, tit, aut, ano, true));
+        while (opcaoSessao != 0) {
+            if (usuarioLogado == null) {
+                System.out.println("\n===== BEM-VINDO À BIBLIOTECA =====");
+                System.out.println("1. Fazer Login");
+                System.out.println("2. Cadastrar Novo Usuário");
+                System.out.println("3. Listar Livros Disponíveis");
+                System.out.println("0. Salvar e Sair do Sistema");
+                System.out.print("Escolha uma opção: ");
+
+                try {
+                    opcaoSessao = Integer.parseInt(sc.nextLine());
+                    switch (opcaoSessao) {
+                        case 1 -> {
+                            System.out.print("Digite seu ID de usuário: ");
+                            int id = Integer.parseInt(sc.nextLine());
+                            try {
+                                usuarioLogado = biblioteca.buscarUsuarioPorId(id);
+                                System.out.println("Login realizado com sucesso! Bem-vindo, " + usuarioLogado.getNome());
+                            } catch (UsuarioNaoEncontradoException e) {
+                                System.out.println("[Erro] " + e.getMessage());
+                            }
+                        }
+                        case 2 -> {
+                            System.out.println("\n--- Tipo de Cadastro ---");
+                            System.out.println("1. Estudante");
+                            System.out.println("2. Professor");
+                            System.out.print("Escolha o tipo: ");
+                            int tipo = Integer.parseInt(sc.nextLine());
+
+                            System.out.print("ID do Usuário (int): ");
+                            int id = Integer.parseInt(sc.nextLine());
+                            System.out.print("Nome: ");
+                            String nome = sc.nextLine();
+                            System.out.print("Email: ");
+                            String email = sc.nextLine();
+
+                            if (tipo == 1) {
+                                biblioteca.cadastrarUsuario(new Estudante(id, nome, email));
+                            } else if (tipo == 2) {
+                                biblioteca.cadastrarUsuario(new Professor(id, nome, email));
+                            } else {
+                                System.out.println("Tipo inválido! Cadastro cancelado.");
+                            }
+                        }
+                        case 3 -> biblioteca.listarLivrosDisponiveis();
+                        case 0 -> {
+                            biblioteca.gravarDados();
+                            System.out.println("Sistema encerrado.");
+                        }
+                        default -> System.out.println("Opção inválida!");
                     }
-                    case 2 -> {
-                        System.out.print("ID do Usuário (int): "); 
-                        int id = Integer.parseInt(sc.nextLine());
-                        System.out.print("Nome: "); 
-                        String nome = sc.nextLine();
-                        System.out.print("Email: "); 
-                        String email = sc.nextLine();
-                        biblioteca.cadastrarUsuario(new Usuario(id, nome, email));
-                    }
-                    case 3 -> {
-                        System.out.print("Digite o ID do usuário: "); 
-                        int id = Integer.parseInt(sc.nextLine());
-                        System.out.println(biblioteca.buscarUsuarioPorId(id));
-                    }
-                    case 4 -> {
-                        System.out.print("Digite o nome ou parte dele: "); 
-                        String nome = sc.nextLine();
-                        biblioteca.buscarUsuarioPorNome(nome);
-                    }
-                    case 5 -> {
-                        System.out.print("Digite o código do livro: "); 
-                        int cod = Integer.parseInt(sc.nextLine());
-                        System.out.println(biblioteca.buscarLivroPorCodigo(cod));
-                    }
-                    case 6 -> {
-                        System.out.print("Digite o autor ou parte dele: "); 
-                        String autor = sc.nextLine();
-                        biblioteca.buscarLivroPorAutor(autor);
-                    }
-                    case 7 -> {
-                        System.out.print("Código do Livro: "); 
-                        int codL = Integer.parseInt(sc.nextLine());
-                        System.out.print("ID do Usuário: "); 
-                        int idU = Integer.parseInt(sc.nextLine());
-                        biblioteca.realizarEmprestimo(codL, idU);
-                    }
-                    case 8 -> {
-                        System.out.print("Código do Livro para Devolução: "); 
-                        int codL = Integer.parseInt(sc.nextLine());
-                        biblioteca.realizarDevolucao(codL);
-                    }
-                    case 9 -> biblioteca.listarLivrosCadastrados();
-                    case 10 -> biblioteca.listarLivrosDisponiveis();
-                    case 11 -> biblioteca.listarLivrosEmprestados();
-                    case 12 -> {
-                        System.out.print("ID do Usuário: "); 
-                        int idU = Integer.parseInt(sc.nextLine());
-                        biblioteca.listarLivrosEmprestadosPorUsuario(idU);
-                    }
-                    case 13 -> biblioteca.gravarDados();
-                    case 0 -> {
-                        biblioteca.gravarDados();
-                        System.out.println("Sistema encerrado.");
-                    }
-                    default -> System.out.println("Opção inválida!");
+                } catch (NumberFormatException e) {
+                    System.out.println("[Erro] Entrada inválida. Insira um número.");
+                } catch (Exception e) {
+                    System.out.println("[Erro] " + e.getMessage());
                 }
-            } catch (NumberFormatException e) {
-                System.out.println("[Erro] Entrada inválida. Por favor, insira um número válido.");
-            } catch (UsuarioNaoEncontradoException | LivroNaoEncontradoException | LivroIndisponivelException e) {
-                System.out.println("[Erro Negócio] " + e.getMessage());
-            } catch (Exception e) {
-                System.out.println("[Erro Sistema] " + e.getMessage());
+            } else if (usuarioLogado instanceof Professor) {
+                System.out.println("\n===== MENU DOCENTE (PROFESSOR) =====");
+                System.out.println("1. Cadastrar Livro");
+                System.out.println("2. Buscar Usuário por ID");
+                System.out.println("3. Buscar Usuário por Nome");
+                System.out.println("4. Realizar Empréstimo");
+                System.out.println("5. Realizar Devolução");
+                System.out.println("6. Listar Todos os Livros");
+                System.out.println("7. Listar Livros Emprestados");
+                System.out.println("8. Gravar Dados Agora");
+                System.out.println("9. Logout (Trocar de Usuário)");
+                System.out.println("0. Salvar e Sair");
+                System.out.print("Escolha uma opção: ");
+
+                try {
+                    int op = Integer.parseInt(sc.nextLine());
+                    switch (op) {
+                        case 1 -> {
+                            System.out.print("Código do Livro (int): ");
+                            int cod = Integer.parseInt(sc.nextLine());
+                            System.out.print("Título: ");
+                            String tit = sc.nextLine();
+                            System.out.print("Autor: ");
+                            String aut = sc.nextLine();
+                            System.out.print("Ano de Publicação: ");
+                            int ano = Integer.parseInt(sc.nextLine());
+                            biblioteca.cadastrarLivro(new Livro(cod, tit, aut, ano, true));
+                        }
+                        case 2 -> {
+                            System.out.print("Digite o ID do usuário: ");
+                            int id = Integer.parseInt(sc.nextLine());
+                            System.out.println(biblioteca.buscarUsuarioPorId(id));
+                        }
+                        case 3 -> {
+                            System.out.print("Digite o nome ou parte dele: ");
+                            String nome = sc.nextLine();
+                            biblioteca.buscarUsuarioPorNome(nome);
+                        }
+                        case 4 -> {
+                            System.out.print("Código do Livro: ");
+                            int codL = Integer.parseInt(sc.nextLine());
+                            System.out.print("ID do Usuário: ");
+                            int idU = Integer.parseInt(sc.nextLine());
+                            biblioteca.realizarEmprestimo(codL, idU);
+                        }
+                        case 5 -> {
+                            System.out.print("Código do Livro para Devolução: ");
+                            int codL = Integer.parseInt(sc.nextLine());
+                            biblioteca.realizarDevolucao(codL);
+                        }
+                        case 6 -> biblioteca.listarLivrosCadastrados();
+                        case 7 -> biblioteca.listarLivrosEmprestados();
+                        case 8 -> biblioteca.gravarDados();
+                        case 9 -> {
+                            usuarioLogado = null;
+                            System.out.println("Logout efetuado.");
+                        }
+                        case 0 -> {
+                            biblioteca.gravarDados();
+                            opcaoSessao = 0;
+                            System.out.println("Sistema encerrado.");
+                        }
+                        default -> System.out.println("Opção inválida!");
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("[Erro] Entrada inválida.");
+                } catch (UsuarioNaoEncontradoException | LivroNaoEncontradoException | LivroIndisponivelException e) {
+                    System.out.println("[Erro Negócio] " + e.getMessage());
+                } catch (Exception e) {
+                    System.out.println("[Erro Sistema] " + e.getMessage());
+                }
+            } else if (usuarioLogado instanceof Estudante) {
+                System.out.println("\n===== MENU DISCENTE (ESTUDANTE) =====");
+                System.out.println("1. Buscar Livro por Código");
+                System.out.println("2. Buscar Livro por Autor");
+                System.out.println("3. Listar Meus Livros Emprestados");
+                System.out.println("4. Logout (Trocar de Usuário)");
+                System.out.println("0. Salvar e Sair");
+                System.out.print("Escolha uma opção: ");
+
+                try {
+                    int op = Integer.parseInt(sc.nextLine());
+                    switch (op) {
+                        case 1 -> {
+                            System.out.print("Digite o código do livro: ");
+                            int cod = Integer.parseInt(sc.nextLine());
+                            System.out.println(biblioteca.buscarLivroPorCodigo(cod));
+                        }
+                        case 2 -> {
+                            System.out.print("Digite o autor ou parte dele: ");
+                            String autor = sc.nextLine();
+                            biblioteca.buscarLivroPorAutor(autor);
+                        }
+                        case 3 -> biblioteca.listarLivrosEmprestadosPorUsuario(usuarioLogado.getId());
+                        case 4 -> {
+                            usuarioLogado = null;
+                            System.out.println("Logout efetuado.");
+                        }
+                        case 0 -> {
+                            biblioteca.gravarDados();
+                            opcaoSessao = 0;
+                            System.out.println("Sistema encerrado.");
+                        }
+                        default -> System.out.println("Opção inválida!");
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("[Erro] Entrada inválida.");
+                } catch (LivroNaoEncontradoException e) {
+                    System.out.println("[Erro Negócio] " + e.getMessage());
+                } catch (Exception e) {
+                    System.out.println("[Erro Sistema] " + e.getMessage());
+                }
             }
         }
         sc.close();

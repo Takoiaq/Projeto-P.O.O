@@ -24,8 +24,18 @@ public class Usuario implements DadosEntidade {
         return email; 
     }
 
+    public int getPrazoEmprestimo() {
+        return 7;
+    }
+
     public String toCsv() {
-        return id + ";" + nome + ";" + email;
+        String tipo = "USUARIO";
+        if (this instanceof Estudante) {
+            tipo = "ESTUDANTE";
+        } else if (this instanceof Professor) {
+            tipo = "PROFESSOR";
+        }
+        return tipo + ";" + id + ";" + nome + ";" + email;
     } 
 
     @Override
