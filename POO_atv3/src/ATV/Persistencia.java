@@ -48,17 +48,21 @@ public class Persistencia {
     }
 
     public DadosBiblioteca carregarDados() throws ArquivoInvalidoException {
-        try {
-            List<Livro> livros = carregarLivros();
-            List<Usuario> usuarios = carregarUsuarios();
-            List<Emprestimo> emprestimos = carregarEmprestimos(livros, usuarios);
+    try {
+        List<Livro> livros = carregarLivros();
+        List<Usuario> usuarios = carregarUsuarios();
+        List<Emprestimo> emprestimos = carregarEmprestimos(livros, usuarios);
 
-            return new DadosBiblioteca(livros, usuarios, emprestimos);
+        return new DadosBiblioteca(livros, usuarios, emprestimos);
 
-        } catch (IOException | NumberFormatException | DateTimeParseException | IndexOutOfBoundsException e) {
-            throw new ArquivoInvalidoException("Erro ao ler os arquivos. Verifique se os dados estão no formato correto.");
-        }
+    } catch (IOException | DateTimeParseException |
+             IndexOutOfBoundsException | IllegalArgumentException e) {
+
+        throw new ArquivoInvalidoException(
+                "Erro ao ler os arquivos. Verifique se os dados estão no formato correto: " + e.getMessage()
+        );
     }
+}
 
     private void verificarDiretorio(File arquivo) throws IOException {
         File pasta = arquivo.getParentFile();
@@ -119,6 +123,8 @@ public class Persistencia {
                 int anoPublicacao = Integer.parseInt(tokens[3].trim());
                 boolean disponivel = parseStringToBool(tokens[4].trim());
 
+                validarCodigoNaoNegativo(codigo, "Código do livro");
+
                 lista.add(new Livro(codigo, titulo, autor, anoPublicacao, disponivel));
             }
         }
@@ -149,10 +155,17 @@ public class Persistencia {
                 String nome = tokens[2].trim();
                 String email = tokens[3].trim();
 
+                validarIdNaoNegativo(id, "ID de usuário");
+                validarEmail(email);
+
                 if (tipo.equals("ESTUDANTE")) {
                     lista.add(new Estudante(id, nome, email));
-                } else if (tipo.equals("BIBLIOTECARIO")) {
+
+                } else if (tipo.equals("BIBLIOTECARIO") || tipo.equals("PROFESSOR")) {
+                    // Aceita PROFESSOR para não quebrar arquivos antigos,
+                    // mas quando salvar de novo será gravado como BIBLIOTECARIO.
                     lista.add(new Bibliotecario(id, nome, email));
+
                 } else {
                     throw new ArquivoInvalidoException("Tipo de usuário inválido em usuarios.txt: " + tipo);
                 }
@@ -187,12 +200,16 @@ public class Persistencia {
                 LocalDate dataEmprestimo = LocalDate.parse(tokens[2].trim());
                 LocalDate dataPrevistaDevolucao = LocalDate.parse(tokens[3].trim());
 
+                validarCodigoNaoNegativo(codigoLivro, "Código do livro");
+                validarIdNaoNegativo(idUsuario, "ID de usuário");
+
                 Livro livro = acharLivro(livros, codigoLivro);
                 Usuario usuario = acharUsuario(usuarios, idUsuario);
 
                 if (livro == null || usuario == null) {
                     throw new ArquivoInvalidoException(
-                            "Arquivo de empréstimos possui livro ou usuário que não existe no cadastro.");
+                            "Arquivo de empréstimos possui livro ou usuário que não existe no cadastro."
+                    );
                 }
 
                 lista.add(new Emprestimo(livro, usuario, dataEmprestimo, dataPrevistaDevolucao));
@@ -205,6 +222,38 @@ public class Persistencia {
     private void validarTokens(String[] tokens, int esperado, String arquivo) throws ArquivoInvalidoException {
         if (tokens.length != esperado) {
             throw new ArquivoInvalidoException("Linha inválida em " + arquivo + ".");
+        }
+    }
+
+    private void validarIdNaoNegativo(int id, String campo) {
+        if (id < 0) {
+            throw new IllegalArgumentException(campo + " não pode ser negativo.");
+        }
+    }
+
+    private void validarCodigoNaoNegativo(int codigo, String campo) {
+        if (codigo < 0) {
+            throw new IllegalArgumentException(campo + " não pode ser negativo.");
+        }
+    }
+
+    private void validarEmail(String email) {
+        String emailTratado = email == null ? "" : email.trim();
+
+        if (emailTratado.isBlank()) {
+            throw new IllegalArgumentException("Email não pode estar vazio.");
+        }
+
+        if (emailTratado.contains(" ")) {
+            throw new IllegalArgumentException("Email não pode conter espaços.");
+        }
+
+        boolean emailValido = emailTratado.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
+
+        if (!emailValido) {
+            throw new IllegalArgumentException(
+                    "Email inválido: " + emailTratado + ". Use um formato como nome@email.com"
+            );
         }
     }
 
