@@ -1,0 +1,2 @@
+13;Movimento Capitalista;Luis Inacio Lula Da Silva;2013;true
+6967;Como Farmar Aura?;Raul tecio;2026;false
