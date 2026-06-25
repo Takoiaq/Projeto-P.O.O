@@ -18,6 +18,8 @@ import ATV.Biblioteca;
 import ATV.Livro;
 import ATV.Persistencia;
 import ATV.Usuario;
+import ATV.Estudante;
+import ATV.Professor;
 import ATV.Exception.ArquivoInvalidoException;
 import ATV.Exception.LivroIndisponivelException;
 import ATV.Exception.LivroNaoEncontradoException;
@@ -64,7 +66,7 @@ public class BibliotecaTest {
 
     @Test
     void deveCadastrarUsuario() throws UsuarioNaoEncontradoException {
-        Usuario usuario = new Usuario(10, "Usuario Teste", "teste@email.com");
+        Usuario usuario = new Estudante(10, "Usuario Teste", "teste@email.com");
 
         biblioteca.cadastrarUsuario(usuario);
 
@@ -75,9 +77,18 @@ public class BibliotecaTest {
     }
 
     @Test
+    void deveValidarPrazoDiferenciadoPolimorfismo() {
+        Usuario estudante = new Estudante(1, "Aluno", "aluno@email.com");
+        Usuario professor = new Professor(2, "Docente", "docente@email.com");
+
+        assertEquals(7, estudante.getPrazoEmprestimo());
+        assertEquals(14, professor.getPrazoEmprestimo());
+    }
+
+    @Test
     void deveRealizarEmprestimo() throws Exception {
         Livro livro = new Livro(2, "Java Avançado", "Expert", 2026, true);
-        Usuario usuario = new Usuario(20, "Developer", "dev@email.com");
+        Usuario usuario = new Estudante(20, "Developer", "dev@email.com");
 
         biblioteca.cadastrarLivro(livro);
         biblioteca.cadastrarUsuario(usuario);
@@ -90,7 +101,7 @@ public class BibliotecaTest {
     @Test
     void deveRealizarDevolucao() throws Exception {
         Livro livro = new Livro(3, "Estruturas de Dados", "Professor", 2025, true);
-        Usuario usuario = new Usuario(30, "Aluno", "aluno@email.com");
+        Usuario usuario = new Estudante(30, "Aluno", "aluno@email.com");
 
         biblioteca.cadastrarLivro(livro);
         biblioteca.cadastrarUsuario(usuario);
@@ -104,7 +115,7 @@ public class BibliotecaTest {
     @Test
     void deveEscreverArquivos() throws Exception {
         Livro livro = new Livro(55, "Persistência em Java", "Uncle Bob", 2020, true);
-        Usuario usuario = new Usuario(66, "Felipe", "felipe@email.com");
+        Usuario usuario = new Estudante(66, "Felipe", "felipe@email.com");
 
         biblioteca.cadastrarLivro(livro);
         biblioteca.cadastrarUsuario(usuario);
@@ -117,15 +128,15 @@ public class BibliotecaTest {
         assertTrue(Files.exists(arquivoEmprestimos));
 
         assertTrue(Files.readString(arquivoLivros).contains("55;Persistência em Java;Uncle Bob;2020;false"));
-        assertTrue(Files.readString(arquivoUsuarios).contains("66;Felipe;felipe@email.com"));
+        assertTrue(Files.readString(arquivoUsuarios).contains("ESTUDANTE;66;Felipe;felipe@email.com"));
         assertTrue(Files.readString(arquivoEmprestimos).contains("55;66;"));
     }
 
     @Test
     void deveLerArquivos() throws Exception {
         Files.writeString(arquivoLivros, "77;Livro Carregado;Autor Arquivo;2019;false\n");
-        Files.writeString(arquivoUsuarios, "88;Usuario Arquivo;arquivo@email.com\n");
-        Files.writeString(arquivoEmprestimos, "77;88;2026-06-01;2026-06-08\n");
+        Files.writeString(arquivoUsuarios, "PROFESSOR;88;Usuario Arquivo;arquivo@email.com\n");
+        Files.writeString(arquivoEmprestimos, "77;88;2026-06-01;2026-06-15\n");
 
         biblioteca.carregarDados();
 
@@ -134,6 +145,8 @@ public class BibliotecaTest {
 
         assertEquals("Livro Carregado", livroCarregado.getTitulo());
         assertEquals("Usuario Arquivo", usuarioCarregado.getNome());
+        assertTrue(usuarioCarregado instanceof Professor);
+        assertEquals(14, usuarioCarregado.getPrazoEmprestimo());
         assertFalse(livroCarregado.isDisp());
 
         biblioteca.realizarDevolucao(77);
@@ -155,10 +168,17 @@ public class BibliotecaTest {
     }
 
     @Test
+    void deveLancarExcecaoQuandoDevolverLivroNaoEncontrado() {
+        assertThrows(LivroNaoEncontradoException.class, () -> {
+            biblioteca.realizarDevolucao(9999);
+        });
+    }
+
+    @Test
     void deveLancarExcecaoQuandoLivroEstiverIndisponivel() throws Exception {
         Livro livro = new Livro(4, "Dom Casmurro", "Machado de Assis", 1899, true);
-        Usuario usuario1 = new Usuario(1, "Machado", "machado@email.com");
-        Usuario usuario2 = new Usuario(2, "Alencar", "alencar@email.com");
+        Usuario usuario1 = new Estudante(1, "Machado", "machado@email.com");
+        Usuario usuario2 = new Professor(2, "Alencar", "alencar@email.com");
 
         biblioteca.cadastrarLivro(livro);
         biblioteca.cadastrarUsuario(usuario1);

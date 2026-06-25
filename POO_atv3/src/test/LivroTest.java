@@ -25,7 +25,7 @@ public class LivroTest {
     @Test
     public void testAlterarDisponibilidade() {
         livro.setDisp(false);
-        falseFalse(livro.isDisp(), "O status de disponibilidade deve mudar para falso.");
+        assertFalse(livro.isDisp(), "O status de disponibilidade deve mudar para falso.");
     }
 
     @Test

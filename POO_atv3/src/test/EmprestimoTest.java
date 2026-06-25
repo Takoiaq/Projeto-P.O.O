@@ -3,6 +3,7 @@ package test;
 import ATV.Emprestimo;
 import ATV.Livro;
 import ATV.Usuario;
+import ATV.Estudante;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
@@ -18,7 +19,7 @@ public class EmprestimoTest {
     @BeforeEach
     public void setUp() {
         livro = new Livro(1, "Dom Casmurro", "Machado de Assis", 1899, true);
-        usuario = new Usuario(1, "João Souza", "joao@ufc.br");
+        usuario = new Estudante(1, "João Souza", "joao@ufc.br");
         dataEmp = LocalDate.now();
         dataPrev = LocalDate.now().plusDays(7);
         emprestimo = new Emprestimo(livro, usuario, dataEmp, dataPrev);
