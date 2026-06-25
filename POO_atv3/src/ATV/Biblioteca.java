@@ -120,6 +120,7 @@ public class Biblioteca {
     }
 
     public void realizarDevolucao(int codigoLivro) throws LivroNaoEncontradoException {
+        Livro livro = buscarLivroPorCodigo(codigoLivro);
         Emprestimo emprestimoEncontrado = null;
 
         for (Emprestimo emprestimo : emprestimos) {
@@ -130,12 +131,13 @@ public class Biblioteca {
         }
 
         if (emprestimoEncontrado == null) {
-            throw new LivroNaoEncontradoException("Este livro não consta na lista de empréstimos Disponiveis.");
+            System.out.println("Aviso: O livro '" + livro.getTitulo() + "' ja consta como disponivel no sistema.");
+            return;
         }
 
         emprestimoEncontrado.getLivro().setDisp(true);
         emprestimos.remove(emprestimoEncontrado);
-        System.out.println("Devolução realizada com sucesso!");
+        System.out.println("Devolucao do livro '" + livro.getTitulo() + "' realizada com sucesso!");
     }
 
     public void listarLivrosCadastrados() {

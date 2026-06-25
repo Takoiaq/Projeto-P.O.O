@@ -2,6 +2,9 @@ package ATV;
 
 import java.util.Scanner;
 import ATV.Exception.ArquivoInvalidoException;
+import ATV.Exception.LivroIndisponivelException;
+import ATV.Exception.LivroNaoEncontradoException;
+import ATV.Exception.UsuarioNaoEncontradoException;
 
 public class Main {
     public static void main(String[] args) {
@@ -105,9 +108,11 @@ public class Main {
                     default -> System.out.println("Opção inválida!");
                 }
             } catch (NumberFormatException e) {
-                System.out.println("[Erro] Por favor, insira um número válido para as opções/IDs.");
+                System.out.println("[Erro] Entrada inválida. Por favor, insira um número válido.");
+            } catch (UsuarioNaoEncontradoException | LivroNaoEncontradoException | LivroIndisponivelException e) {
+                System.out.println("[Erro Negócio] " + e.getMessage());
             } catch (Exception e) {
-                System.out.println("[Erro] " + e.getMessage());
+                System.out.println("[Erro Sistema] " + e.getMessage());
             }
         }
         sc.close();

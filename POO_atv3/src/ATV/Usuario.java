@@ -1,6 +1,6 @@
 package ATV;
 
-public class Usuario {
+public class Usuario implements DadosEntidade {
     private int id; 
     private String nome; 
     private String email;
@@ -11,6 +11,7 @@ public class Usuario {
         this.email = email;
     }
 
+    @Override
     public int getId() { 
         return id; 
     }
