@@ -24,6 +24,7 @@ import ATV.Exception.LivroNaoEncontradoException;
 import ATV.Exception.UsuarioNaoEncontradoException;
 
 public class BibliotecaTest {
+
     @TempDir
     Path pastaTemporaria;
 
@@ -41,7 +42,8 @@ public class BibliotecaTest {
         Persistencia persistencia = new Persistencia(
                 arquivoLivros.toString(),
                 arquivoUsuarios.toString(),
-                arquivoEmprestimos.toString());
+                arquivoEmprestimos.toString()
+        );
 
         biblioteca = new Biblioteca(persistencia);
     }

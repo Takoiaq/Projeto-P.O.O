@@ -17,14 +17,10 @@ public class EmprestimoTest {
 
     @BeforeEach
     public void setUp() {
-        // 1. Cria o livro usando o construtor
         livro = new Livro(1, "Dom Casmurro", "Machado de Assis", 1899, true);
-
         usuario = new Usuario(1, "João Souza", "joao@ufc.br");
-
         dataEmp = LocalDate.now();
         dataPrev = LocalDate.now().plusDays(7);
-
         emprestimo = new Emprestimo(livro, usuario, dataEmp, dataPrev);
     }
 
@@ -39,9 +35,7 @@ public class EmprestimoTest {
 
     @Test
     public void testToCsv() {
-        // Monta o texto esperado exatamente no formato que o seu método toCsv() gera
         String esperado = livro.getCodigo() + ";" + usuario.getId() + ";" + dataEmp + ";" + dataPrev;
-        
         assertEquals(esperado, emprestimo.toCsv(), "O método toCsv() deve gerar a linha formatada corretamente.");
     }
 }

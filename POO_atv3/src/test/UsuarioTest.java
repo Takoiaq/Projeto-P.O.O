@@ -10,7 +10,6 @@ public class UsuarioTest {
 
     @BeforeEach
     public void setUp() {
-        // Construtor real: id, nome, email
         usuario = new Usuario(10, "Ana Clara", "ana@ufc.br");
     }
 
@@ -22,8 +21,8 @@ public class UsuarioTest {
     }
 
     @Test
-    public void testConvert() {
+    public void testToCsv() {
         String esperado = "10;Ana Clara;ana@ufc.br";
-        assertEquals(esperado, usuario.convert(), "O método convert() deve gerar a string de persistência corretamente.");
+        assertEquals(esperado, usuario.toCsv(), "O método toCsv() deve gerar a string de persistência corretamente.");
     }
 }

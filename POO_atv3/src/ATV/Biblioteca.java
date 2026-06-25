@@ -33,9 +33,9 @@ public class Biblioteca {
 
     public void carregarDados() throws ArquivoInvalidoException {
         Persistencia.DadosBiblioteca dados = persistencia.carregarDados();
-        this.livros = dados.getLivros();
-        this.usuarios = dados.getUsuarios();
-        this.emprestimos = dados.getEmprestimos();
+        livros = dados.getLivros();
+        usuarios = dados.getUsuarios();
+        emprestimos = dados.getEmprestimos();
     }
 
     public void cadastrarLivro(Livro livro) {
@@ -176,7 +176,7 @@ public class Biblioteca {
             }
         }
         if (!possui) {
-            System.out.println("Este usuário não possui empréstimos ativos.");
+            System.out.println("Este usuário não possui empréstimos activos.");
         }
     }
 }

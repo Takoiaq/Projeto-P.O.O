@@ -14,30 +14,30 @@ import java.util.List;
 import ATV.Exception.ArquivoInvalidoException;
 
 public class Persistencia {
-    private final File arquivoLivros;
-    private final File arquivoUsuarios;
-    private final File arquivoEmprestimos;
+    private final File arqLivros;
+    private final File arqUsuarios;
+    private final File arqEmprestimos;
 
     public Persistencia() {
         this("livros.txt", "usuarios.txt", "emprestimos.txt");
     }
 
-    public Persistencia(String arquivoLivros, String arquivoUsuarios, String arquivoEmprestimos) {
-        this.arquivoLivros = new File(arquivoLivros);
-        this.arquivoUsuarios = new File(arquivoUsuarios);
-        this.arquivoEmprestimos = new File(arquivoEmprestimos);
+    public Persistencia(String arqLivros, String arqUsuarios, String arqEmprestimos) {
+        this.arqLivros = new File(arqLivros);
+        this.arqUsuarios = new File(arqUsuarios);
+        this.arqEmprestimos = new File(arqEmprestimos);
     }
 
     public void gravarDados(List<Livro> livros, List<Usuario> usuarios, List<Emprestimo> emprestimos)
             throws ArquivoInvalidoException {
         try {
-            criarPastaSeNecessario(arquivoLivros);
-            criarPastaSeNecessario(arquivoUsuarios);
-            criarPastaSeNecessario(arquivoEmprestimos);
+            verificarDiretorio(arqLivros);
+            verificarDiretorio(arqUsuarios);
+            verificarDiretorio(arqEmprestimos);
 
-            gravarLivros(livros);
-            gravarUsuarios(usuarios);
-            gravarEmprestimos(emprestimos);
+            salvarLivros(livros);
+            salvarUsuarios(usuarios);
+            salvarEmprestimos(emprestimos);
         } catch (IOException e) {
             throw new ArquivoInvalidoException("Erro ao gravar os arquivos: " + e.getMessage());
         }
@@ -55,137 +55,137 @@ public class Persistencia {
         }
     }
 
-    private void criarPastaSeNecessario(File arquivo) throws IOException {
+    private void verificarDiretorio(File arquivo) throws IOException {
         File pasta = arquivo.getParentFile();
         if (pasta != null && !pasta.exists() && !pasta.mkdirs()) {
             throw new IOException("Não foi possível criar a pasta: " + pasta.getAbsolutePath());
         }
     }
 
-    private void gravarLivros(List<Livro> livros) throws IOException {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(arquivoLivros))) {
-            for (Livro livro : livros) {
-                bw.write(livro.convert());
+    private void salvarLivros(List<Livro> livros) throws IOException {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(arqLivros))) {
+            for (Livro l : livros) {
+                bw.write(l.toCsv());
                 bw.newLine();
             }
         }
     }
 
-    private void gravarUsuarios(List<Usuario> usuarios) throws IOException {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(arquivoUsuarios))) {
-            for (Usuario usuario : usuarios) {
-                bw.write(usuario.convert());
+    private void salvarUsuarios(List<Usuario> usuarios) throws IOException {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(arqUsuarios))) {
+            for (Usuario u : usuarios) {
+                bw.write(u.toCsv());
                 bw.newLine();
             }
         }
     }
 
-    private void gravarEmprestimos(List<Emprestimo> emprestimos) throws IOException {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(arquivoEmprestimos))) {
-            for (Emprestimo emprestimo : emprestimos) {
-                bw.write(emprestimo.toCsv());
+    private void salvarEmprestimos(List<Emprestimo> emprestimos) throws IOException {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(arqEmprestimos))) {
+            for (Emprestimo e : emprestimos) {
+                bw.write(e.toCsv());
                 bw.newLine();
             }
         }
     }
 
     private List<Livro> carregarLivros() throws IOException, ArquivoInvalidoException {
-        List<Livro> livros = new ArrayList<>();
-        if (!arquivoLivros.exists()) {
-            return livros;
+        List<Livro> lista = new ArrayList<>();
+        if (!arqLivros.exists()) {
+            return lista;
         }
 
-        try (BufferedReader br = new BufferedReader(new FileReader(arquivoLivros))) {
-            String linha;
-            while ((linha = br.readLine()) != null) {
-                if (linha.isBlank()) {
+        try (BufferedReader br = new BufferedReader(new FileReader(arqLivros))) {
+            String ln;
+            while ((ln = br.readLine()) != null) {
+                if (ln.isBlank()) {
                     continue;
                 }
 
-                String[] campos = linha.split(";", -1);
-                validarQuantidadeCampos(campos, 5, "livros.txt");
+                String[] tokens = ln.split(";", -1);
+                validarTokens(tokens, 5, "livros.txt");
 
-                int codigo = Integer.parseInt(campos[0]);
-                String titulo = campos[1];
-                String autor = campos[2];
-                int anoPublicacao = Integer.parseInt(campos[3]);
-                boolean disponivel = lerBoolean(campos[4]);
+                int codigo = Integer.parseInt(tokens[0]);
+                String titulo = tokens[1];
+                String autor = tokens[2];
+                int anoPublicacao = Integer.parseInt(tokens[3]);
+                boolean disponivel = parseStringToBool(tokens[4]);
 
-                livros.add(new Livro(codigo, titulo, autor, anoPublicacao, disponivel));
+                lista.add(new Livro(codigo, titulo, autor, anoPublicacao, disponivel));
             }
         }
-        return livros;
+        return lista;
     }
 
     private List<Usuario> carregarUsuarios() throws IOException, ArquivoInvalidoException {
-        List<Usuario> usuarios = new ArrayList<>();
-        if (!arquivoUsuarios.exists()) {
-            return usuarios;
+        List<Usuario> lista = new ArrayList<>();
+        if (!arqUsuarios.exists()) {
+            return lista;
         }
 
-        try (BufferedReader br = new BufferedReader(new FileReader(arquivoUsuarios))) {
-            String linha;
-            while ((linha = br.readLine()) != null) {
-                if (linha.isBlank()) {
+        try (BufferedReader br = new BufferedReader(new FileReader(arqUsuarios))) {
+            String ln;
+            while ((ln = br.readLine()) != null) {
+                if (ln.isBlank()) {
                     continue;
                 }
 
-                String[] campos = linha.split(";", -1);
-                validarQuantidadeCampos(campos, 3, "usuarios.txt");
+                String[] tokens = ln.split(";", -1);
+                validarTokens(tokens, 3, "usuarios.txt");
 
-                int id = Integer.parseInt(campos[0]);
-                String nome = campos[1];
-                String email = campos[2];
+                int id = Integer.parseInt(tokens[0]);
+                String nome = tokens[1];
+                String email = tokens[2];
 
-                usuarios.add(new Usuario(id, nome, email));
+                lista.add(new Usuario(id, nome, email));
             }
         }
-        return usuarios;
+        return lista;
     }
 
     private List<Emprestimo> carregarEmprestimos(List<Livro> livros, List<Usuario> usuarios)
             throws IOException, ArquivoInvalidoException {
-        List<Emprestimo> emprestimos = new ArrayList<>();
-        if (!arquivoEmprestimos.exists()) {
-            return emprestimos;
+        List<Emprestimo> lista = new ArrayList<>();
+        if (!arqEmprestimos.exists()) {
+            return lista;
         }
 
-        try (BufferedReader br = new BufferedReader(new FileReader(arquivoEmprestimos))) {
-            String linha;
-            while ((linha = br.readLine()) != null) {
-                if (linha.isBlank()) {
+        try (BufferedReader br = new BufferedReader(new FileReader(arqEmprestimos))) {
+            String ln;
+            while ((ln = br.readLine()) != null) {
+                if (ln.isBlank()) {
                     continue;
                 }
 
-                String[] campos = linha.split(";", -1);
-                validarQuantidadeCampos(campos, 4, "emprestimos.txt");
+                String[] tokens = ln.split(";", -1);
+                validarTokens(tokens, 4, "emprestimos.txt");
 
-                int codigoLivro = Integer.parseInt(campos[0]);
-                int idUsuario = Integer.parseInt(campos[1]);
-                LocalDate dataEmprestimo = LocalDate.parse(campos[2]);
-                LocalDate dataPrevistaDevolucao = LocalDate.parse(campos[3]);
+                int codigoLivro = Integer.parseInt(tokens[0]);
+                int idUsuario = Integer.parseInt(tokens[1]);
+                LocalDate dataEmprestimo = LocalDate.parse(tokens[2]);
+                LocalDate dataPrevistaDevolucao = LocalDate.parse(tokens[3]);
 
-                Livro livro = procurarLivro(livros, codigoLivro);
-                Usuario usuario = procurarUsuario(usuarios, idUsuario);
+                Livro livro = acharLivro(livros, codigoLivro);
+                Usuario usuario = acharUsuario(usuarios, idUsuario);
 
                 if (livro == null || usuario == null) {
                     throw new ArquivoInvalidoException(
                             "Arquivo de empréstimos possui livro ou usuário que não existe no cadastro.");
                 }
 
-                emprestimos.add(new Emprestimo(livro, usuario, dataEmprestimo, dataPrevistaDevolucao));
+                lista.add(new Emprestimo(livro, usuario, dataEmprestimo, dataPrevistaDevolucao));
             }
         }
-        return emprestimos;
+        return lista;
     }
 
-    private void validarQuantidadeCampos(String[] campos, int esperado, String arquivo) throws ArquivoInvalidoException {
-        if (campos.length != esperado) {
+    private void validarTokens(String[] tokens, int esperado, String arquivo) throws ArquivoInvalidoException {
+        if (tokens.length != esperado) {
             throw new ArquivoInvalidoException("Linha inválida em " + arquivo + ".");
         }
     }
 
-    private boolean lerBoolean(String valor) throws ArquivoInvalidoException {
+    private boolean parseStringToBool(String valor) throws ArquivoInvalidoException {
         if ("true".equalsIgnoreCase(valor)) {
             return true;
         }
@@ -195,19 +195,19 @@ public class Persistencia {
         throw new ArquivoInvalidoException("Valor booleano inválido: " + valor);
     }
 
-    private Livro procurarLivro(List<Livro> livros, int codigo) {
-        for (Livro livro : livros) {
-            if (livro.getCodigo() == codigo) {
-                return livro;
+    private Livro acharLivro(List<Livro> livros, int codigo) {
+        for (Livro l : livros) {
+            if (l.getCodigo() == codigo) {
+                return l;
             }
         }
         return null;
     }
 
-    private Usuario procurarUsuario(List<Usuario> usuarios, int id) {
-        for (Usuario usuario : usuarios) {
-            if (usuario.getId() == id) {
-                return usuario;
+    private Usuario acharUsuario(List<Usuario> usuarios, int id) {
+        for (Usuario u : usuarios) {
+            if (u.getId() == id) {
+                return u;
             }
         }
         return null;

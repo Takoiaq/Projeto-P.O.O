@@ -10,7 +10,6 @@ public class LivroTest {
 
     @BeforeEach
     public void setUp() {
-        // Usa o construtor da classe: codigo, titulo, autor, anop, disp
         livro = new Livro(1, "Dom Casmurro", "Machado de Assis", 1899, true);
     }
 
@@ -30,8 +29,8 @@ public class LivroTest {
     }
 
     @Test
-    public void testConvert() {
+    public void testToCsv() {
         String esperado = "1;Dom Casmurro;Machado de Assis;1899;true";
-        assertEquals(esperado, livro.convert(), "O método convert() deve gerar a string de persistência corretamente.");
+        assertEquals(esperado, livro.toCsv(), "O método toCsv() deve gerar a string de persistência corretamente.");
     }
 }

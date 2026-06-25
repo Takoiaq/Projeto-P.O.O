@@ -11,12 +11,19 @@ public class Usuario {
         this.email = email;
     }
 
-    public int getId() { return id; }
-    public String getNome() { return nome; }
-    public String getEmail() { return email; }
+    public int getId() { 
+        return id; 
+    }
+    
+    public String getNome() { 
+        return nome; 
+    }
+    
+    public String getEmail() { 
+        return email; 
+    }
 
-    // Adiciona o método convert() para facilitar a gravação em CSV
-    public String convert() {
+    public String toCsv() {
         return id + ";" + nome + ";" + email;
     } 
 
