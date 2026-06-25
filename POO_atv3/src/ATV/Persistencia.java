@@ -6,8 +6,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +32,7 @@ public class Persistencia {
 
     public void gravarDados(List<Livro> livros, List<Usuario> usuarios, List<Emprestimo> emprestimos)
             throws ArquivoInvalidoException {
+
         try {
             verificarDiretorio(arqLivros);
             verificarDiretorio(arqUsuarios);
@@ -38,6 +41,7 @@ public class Persistencia {
             salvarLivros(livros);
             salvarUsuarios(usuarios);
             salvarEmprestimos(emprestimos);
+
         } catch (IOException e) {
             throw new ArquivoInvalidoException("Erro ao gravar os arquivos: " + e.getMessage());
         }
@@ -50,6 +54,7 @@ public class Persistencia {
             List<Emprestimo> emprestimos = carregarEmprestimos(livros, usuarios);
 
             return new DadosBiblioteca(livros, usuarios, emprestimos);
+
         } catch (IOException | NumberFormatException | DateTimeParseException | IndexOutOfBoundsException e) {
             throw new ArquivoInvalidoException("Erro ao ler os arquivos. Verifique se os dados estão no formato correto.");
         }
@@ -57,6 +62,7 @@ public class Persistencia {
 
     private void verificarDiretorio(File arquivo) throws IOException {
         File pasta = arquivo.getParentFile();
+
         if (pasta != null && !pasta.exists() && !pasta.mkdirs()) {
             throw new IOException("Não foi possível criar a pasta: " + pasta.getAbsolutePath());
         }
@@ -91,12 +97,14 @@ public class Persistencia {
 
     private List<Livro> carregarLivros() throws IOException, ArquivoInvalidoException {
         List<Livro> lista = new ArrayList<>();
+
         if (!arqLivros.exists()) {
             return lista;
         }
 
         try (BufferedReader br = new BufferedReader(new FileReader(arqLivros))) {
             String ln;
+
             while ((ln = br.readLine()) != null) {
                 if (ln.isBlank()) {
                     continue;
@@ -105,26 +113,29 @@ public class Persistencia {
                 String[] tokens = ln.split(";", -1);
                 validarTokens(tokens, 5, "livros.txt");
 
-                int codigo = Integer.parseInt(tokens[0]);
-                String titulo = tokens[1];
-                String autor = tokens[2];
-                int anoPublicacao = Integer.parseInt(tokens[3]);
-                boolean disponivel = parseStringToBool(tokens[4]);
+                int codigo = Integer.parseInt(tokens[0].trim());
+                String titulo = tokens[1].trim();
+                String autor = tokens[2].trim();
+                int anoPublicacao = Integer.parseInt(tokens[3].trim());
+                boolean disponivel = parseStringToBool(tokens[4].trim());
 
                 lista.add(new Livro(codigo, titulo, autor, anoPublicacao, disponivel));
             }
         }
+
         return lista;
     }
 
     private List<Usuario> carregarUsuarios() throws IOException, ArquivoInvalidoException {
         List<Usuario> lista = new ArrayList<>();
+
         if (!arqUsuarios.exists()) {
             return lista;
         }
 
         try (BufferedReader br = new BufferedReader(new FileReader(arqUsuarios))) {
             String ln;
+
             while ((ln = br.readLine()) != null) {
                 if (ln.isBlank()) {
                     continue;
@@ -133,32 +144,36 @@ public class Persistencia {
                 String[] tokens = ln.split(";", -1);
                 validarTokens(tokens, 4, "usuarios.txt");
 
-                String tipo = tokens[0];
-                int id = Integer.parseInt(tokens[1]);
-                String nome = tokens[2];
-                String email = tokens[3];
+                String tipo = tokens[0].trim().toUpperCase();
+                int id = Integer.parseInt(tokens[1].trim());
+                String nome = tokens[2].trim();
+                String email = tokens[3].trim();
 
                 if (tipo.equals("ESTUDANTE")) {
                     lista.add(new Estudante(id, nome, email));
                 } else if (tipo.equals("PROFESSOR")) {
                     lista.add(new Professor(id, nome, email));
                 } else {
-                    lista.add(new Usuario(id, nome, email));
+                    throw new ArquivoInvalidoException("Tipo de usuário inválido em usuarios.txt: " + tipo);
                 }
             }
         }
+
         return lista;
     }
 
     private List<Emprestimo> carregarEmprestimos(List<Livro> livros, List<Usuario> usuarios)
             throws IOException, ArquivoInvalidoException {
+
         List<Emprestimo> lista = new ArrayList<>();
+
         if (!arqEmprestimos.exists()) {
             return lista;
         }
 
         try (BufferedReader br = new BufferedReader(new FileReader(arqEmprestimos))) {
             String ln;
+
             while ((ln = br.readLine()) != null) {
                 if (ln.isBlank()) {
                     continue;
@@ -167,10 +182,10 @@ public class Persistencia {
                 String[] tokens = ln.split(";", -1);
                 validarTokens(tokens, 4, "emprestimos.txt");
 
-                int codigoLivro = Integer.parseInt(tokens[0]);
-                int idUsuario = Integer.parseInt(tokens[1]);
-                LocalDate dataEmprestimo = LocalDate.parse(tokens[2]);
-                LocalDate dataPrevistaDevolucao = LocalDate.parse(tokens[3]);
+                int codigoLivro = Integer.parseInt(tokens[0].trim());
+                int idUsuario = Integer.parseInt(tokens[1].trim());
+                LocalDate dataEmprestimo = LocalDate.parse(tokens[2].trim());
+                LocalDate dataPrevistaDevolucao = LocalDate.parse(tokens[3].trim());
 
                 Livro livro = acharLivro(livros, codigoLivro);
                 Usuario usuario = acharUsuario(usuarios, idUsuario);
@@ -183,6 +198,7 @@ public class Persistencia {
                 lista.add(new Emprestimo(livro, usuario, dataEmprestimo, dataPrevistaDevolucao));
             }
         }
+
         return lista;
     }
 
@@ -193,12 +209,16 @@ public class Persistencia {
     }
 
     private boolean parseStringToBool(String valor) throws ArquivoInvalidoException {
+        valor = valor.trim();
+
         if ("true".equalsIgnoreCase(valor)) {
             return true;
         }
+
         if ("false".equalsIgnoreCase(valor)) {
             return false;
         }
+
         throw new ArquivoInvalidoException("Valor booleano inválido: " + valor);
     }
 
@@ -208,6 +228,7 @@ public class Persistencia {
                 return l;
             }
         }
+
         return null;
     }
 
@@ -217,6 +238,7 @@ public class Persistencia {
                 return u;
             }
         }
+
         return null;
     }
 

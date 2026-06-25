@@ -6,7 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -15,11 +18,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import ATV.Biblioteca;
+import ATV.Estudante;
 import ATV.Livro;
 import ATV.Persistencia;
-import ATV.Usuario;
-import ATV.Estudante;
 import ATV.Professor;
+import ATV.Usuario;
+
 import ATV.Exception.ArquivoInvalidoException;
 import ATV.Exception.LivroIndisponivelException;
 import ATV.Exception.LivroNaoEncontradoException;
@@ -57,6 +61,7 @@ public class BibliotecaTest {
         biblioteca.cadastrarLivro(livro);
 
         Livro livroEncontrado = biblioteca.buscarLivroPorCodigo(1);
+
         assertNotNull(livroEncontrado);
         assertEquals("Livro Teste", livroEncontrado.getTitulo());
         assertEquals("Autor Teste", livroEncontrado.getAutor());
@@ -71,6 +76,7 @@ public class BibliotecaTest {
         biblioteca.cadastrarUsuario(usuario);
 
         Usuario usuarioEncontrado = biblioteca.buscarUsuarioPorId(10);
+
         assertNotNull(usuarioEncontrado);
         assertEquals("Usuario Teste", usuarioEncontrado.getNome());
         assertEquals("teste@email.com", usuarioEncontrado.getEmail());
@@ -150,6 +156,7 @@ public class BibliotecaTest {
         assertFalse(livroCarregado.isDisp());
 
         biblioteca.realizarDevolucao(77);
+
         assertTrue(livroCarregado.isDisp());
     }
 
@@ -198,5 +205,57 @@ public class BibliotecaTest {
         assertThrows(ArquivoInvalidoException.class, () -> {
             biblioteca.carregarDados();
         });
+    }
+
+    @Test
+    void deveAvisarQuandoIdDeUsuarioJaExistir() throws UsuarioNaoEncontradoException {
+        Usuario usuarioOriginal = new Estudante(1, "Roberty", "roberty@email.com");
+        Usuario usuarioDuplicado = new Professor(1, "Outro Nome", "outro@email.com");
+
+        ByteArrayOutputStream saida = new ByteArrayOutputStream();
+        PrintStream saidaOriginal = System.out;
+
+        try {
+            System.setOut(new PrintStream(saida));
+
+            biblioteca.cadastrarUsuario(usuarioOriginal);
+            biblioteca.cadastrarUsuario(usuarioDuplicado);
+
+        } finally {
+            System.setOut(saidaOriginal);
+        }
+
+        String mensagem = saida.toString();
+
+        assertTrue(mensagem.contains("ID") && mensagem.contains("existe"));
+        assertEquals("Roberty", biblioteca.buscarUsuarioPorId(1).getNome());
+    }
+
+    @Test
+    void deveRemoverEspacosNoInicioEFimDosTextos() {
+        Usuario usuario = new Estudante(1, " Roberty ", " roberty@email.com ");
+        Livro livro = new Livro(2, " Livro Java ", " Autor Teste ", 2026, true);
+
+        assertEquals("Roberty", usuario.getNome());
+        assertEquals("roberty@email.com", usuario.getEmail());
+        assertEquals("Livro Java", livro.getTitulo());
+        assertEquals("Autor Teste", livro.getAutor());
+    }
+
+    @Test
+    void deveCarregarArquivosMesmoComEspacosExtras() throws Exception {
+        Files.writeString(arquivoLivros, " 77 ; Livro Carregado ; Autor Arquivo ; 2019 ; false \n");
+        Files.writeString(arquivoUsuarios, " PROFESSOR ; 88 ; Usuario Arquivo ; arquivo@email.com \n");
+        Files.writeString(arquivoEmprestimos, " 77 ; 88 ; 2026-06-01 ; 2026-06-15 \n");
+
+        biblioteca.carregarDados();
+
+        Livro livroCarregado = biblioteca.buscarLivroPorCodigo(77);
+        Usuario usuarioCarregado = biblioteca.buscarUsuarioPorId(88);
+
+        assertEquals("Livro Carregado", livroCarregado.getTitulo());
+        assertEquals("Usuario Arquivo", usuarioCarregado.getNome());
+        assertTrue(usuarioCarregado instanceof Professor);
+        assertFalse(livroCarregado.isDisp());
     }
 }

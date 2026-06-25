@@ -41,7 +41,7 @@ public class Biblioteca {
     public void cadastrarLivro(Livro livro) {
         try {
             buscarLivroPorCodigo(livro.getCodigo());
-            System.out.println("Erro: Já existe um livro cadastrado com este código.");
+            System.out.println("[Erro] Este código de livro já está sendo usado / já existe no sistema.");
         } catch (LivroNaoEncontradoException e) {
             livros.add(livro);
             System.out.println("Livro cadastrado com sucesso!");
@@ -51,7 +51,7 @@ public class Biblioteca {
     public void cadastrarUsuario(Usuario usuario) {
         try {
             buscarUsuarioPorId(usuario.getId());
-            System.out.println("Erro: Já existe um usuário cadastrado com este ID.");
+            System.out.println("[Erro] Este ID de usuário já está sendo usado / já existe no sistema.");
         } catch (UsuarioNaoEncontradoException e) {
             usuarios.add(usuario);
             System.out.println("Usuário cadastrado com sucesso!");
@@ -68,13 +68,16 @@ public class Biblioteca {
     }
 
     public void buscarUsuarioPorNome(String nome) {
+        String nomeBusca = nome == null ? "" : nome.trim();
         boolean encontrado = false;
+
         for (Usuario usuario : usuarios) {
-            if (usuario.getNome().toLowerCase().contains(nome.toLowerCase())) {
+            if (usuario.getNome().toLowerCase().contains(nomeBusca.toLowerCase())) {
                 System.out.println(usuario);
                 encontrado = true;
             }
         }
+
         if (!encontrado) {
             System.out.println("Nenhum usuário encontrado com esse nome.");
         }
@@ -90,13 +93,16 @@ public class Biblioteca {
     }
 
     public void buscarLivroPorAutor(String autor) {
+        String autorBusca = autor == null ? "" : autor.trim();
         boolean encontrado = false;
+
         for (Livro livro : livros) {
-            if (livro.getAutor().toLowerCase().contains(autor.toLowerCase())) {
+            if (livro.getAutor().toLowerCase().contains(autorBusca.toLowerCase())) {
                 System.out.println(livro);
                 encontrado = true;
             }
         }
+
         if (!encontrado) {
             System.out.println("Nenhum livro encontrado para este autor.");
         }
@@ -104,6 +110,7 @@ public class Biblioteca {
 
     public void realizarEmprestimo(int codigoLivro, int idUsuario)
             throws LivroNaoEncontradoException, UsuarioNaoEncontradoException, LivroIndisponivelException {
+
         Livro livro = buscarLivroPorCodigo(codigoLivro);
         Usuario usuario = buscarUsuarioPorId(idUsuario);
 
@@ -112,11 +119,13 @@ public class Biblioteca {
         }
 
         livro.setDisp(false);
+
         LocalDate dataEmprestimo = LocalDate.now();
         int diasPrazo = usuario.getPrazoEmprestimo();
         LocalDate dataPrevistaDevolucao = dataEmprestimo.plusDays(diasPrazo);
 
         emprestimos.add(new Emprestimo(livro, usuario, dataEmprestimo, dataPrevistaDevolucao));
+
         System.out.println("Empréstimo realizado com sucesso! Devolução até: " + dataPrevistaDevolucao);
     }
 
@@ -138,6 +147,7 @@ public class Biblioteca {
 
         emprestimoEncontrado.getLivro().setDisp(true);
         emprestimos.remove(emprestimoEncontrado);
+
         System.out.println("Devolucao do livro '" + livro.getTitulo() + "' realizada com sucesso!");
     }
 
@@ -146,17 +156,20 @@ public class Biblioteca {
             System.out.println("Nenhum livro cadastrado.");
             return;
         }
+
         livros.forEach(System.out::println);
     }
 
     public void listarLivrosDisponiveis() {
         boolean possui = false;
+
         for (Livro livro : livros) {
             if (livro.isDisp()) {
                 System.out.println(livro);
                 possui = true;
             }
         }
+
         if (!possui) {
             System.out.println("Não há livros disponíveis no momento.");
         }
@@ -167,17 +180,20 @@ public class Biblioteca {
             System.out.println("Nenhum livro emprestado atualmente.");
             return;
         }
+
         emprestimos.forEach(System.out::println);
     }
 
     public void listarLivrosEmprestadosPorUsuario(int idUsuario) {
         boolean possui = false;
+
         for (Emprestimo emprestimo : emprestimos) {
             if (emprestimo.getUsuario().getId() == idUsuario) {
                 System.out.println(emprestimo.getLivro());
                 possui = true;
             }
         }
+
         if (!possui) {
             System.out.println("Este usuário não possui empréstimos activos.");
         }

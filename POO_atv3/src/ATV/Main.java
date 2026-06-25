@@ -1,6 +1,7 @@
 package ATV;
 
 import java.util.Scanner;
+
 import ATV.Exception.ArquivoInvalidoException;
 import ATV.Exception.LivroIndisponivelException;
 import ATV.Exception.LivroNaoEncontradoException;
@@ -31,11 +32,13 @@ public class Main {
                 System.out.print("Escolha uma opção: ");
 
                 try {
-                    opcaoSessao = Integer.parseInt(sc.nextLine());
+                    opcaoSessao = lerInt(sc);
+
                     switch (opcaoSessao) {
                         case 1 -> {
                             System.out.print("Digite seu ID de usuário: ");
-                            int id = Integer.parseInt(sc.nextLine());
+                            int id = lerInt(sc);
+
                             try {
                                 usuarioLogado = biblioteca.buscarUsuarioPorId(id);
                                 System.out.println("Login realizado com sucesso! Bem-vindo, " + usuarioLogado.getNome());
@@ -43,40 +46,54 @@ public class Main {
                                 System.out.println("[Erro] " + e.getMessage());
                             }
                         }
+
                         case 2 -> {
                             System.out.println("\n--- Tipo de Cadastro ---");
                             System.out.println("1. Estudante");
                             System.out.println("2. Professor");
                             System.out.print("Escolha o tipo: ");
-                            int tipo = Integer.parseInt(sc.nextLine());
 
-                            System.out.print("ID do Usuário (int): ");
-                            int id = Integer.parseInt(sc.nextLine());
-                            System.out.print("Nome: ");
-                            String nome = sc.nextLine();
-                            System.out.print("Email: ");
-                            String email = sc.nextLine();
+                            int tipo = lerInt(sc);
 
-                            if (tipo == 1) {
-                                biblioteca.cadastrarUsuario(new Estudante(id, nome, email));
-                            } else if (tipo == 2) {
-                                biblioteca.cadastrarUsuario(new Professor(id, nome, email));
+                            // MUDANÇA:
+                            // Agora, se o usuário digitar algo diferente de 1 ou 2,
+                            // aparece a mensagem de erro e o cadastro não continua.
+                            if (tipo != 1 && tipo != 2) {
+                                System.out.println("[Erro] Tipo inválido! Digite somente 1 para Estudante ou 2 para Professor.");
                             } else {
-                                System.out.println("Tipo inválido! Cadastro cancelado.");
+                                System.out.print("ID do Usuário (int): ");
+                                int id = lerInt(sc);
+
+                                System.out.print("Nome: ");
+                                String nome = lerTexto(sc);
+
+                                System.out.print("Email: ");
+                                String email = lerTexto(sc);
+
+                                if (tipo == 1) {
+                                    biblioteca.cadastrarUsuario(new Estudante(id, nome, email));
+                                } else {
+                                    biblioteca.cadastrarUsuario(new Professor(id, nome, email));
+                                }
                             }
                         }
+
                         case 3 -> biblioteca.listarLivrosDisponiveis();
+
                         case 0 -> {
                             biblioteca.gravarDados();
                             System.out.println("Sistema encerrado.");
                         }
+
                         default -> System.out.println("Opção inválida!");
                     }
+
                 } catch (NumberFormatException e) {
                     System.out.println("[Erro] Entrada inválida. Insira um número.");
                 } catch (Exception e) {
                     System.out.println("[Erro] " + e.getMessage());
                 }
+
             } else if (usuarioLogado instanceof Professor) {
                 System.out.println("\n===== MENU DOCENTE (PROFESSOR) =====");
                 System.out.println("1. Cadastrar Livro");
@@ -92,55 +109,73 @@ public class Main {
                 System.out.print("Escolha uma opção: ");
 
                 try {
-                    int op = Integer.parseInt(sc.nextLine());
+                    int op = lerInt(sc);
+
                     switch (op) {
                         case 1 -> {
                             System.out.print("Código do Livro (int): ");
-                            int cod = Integer.parseInt(sc.nextLine());
+                            int cod = lerInt(sc);
+
                             System.out.print("Título: ");
-                            String tit = sc.nextLine();
+                            String tit = lerTexto(sc);
+
                             System.out.print("Autor: ");
-                            String aut = sc.nextLine();
+                            String aut = lerTexto(sc);
+
                             System.out.print("Ano de Publicação: ");
-                            int ano = Integer.parseInt(sc.nextLine());
+                            int ano = lerInt(sc);
+
                             biblioteca.cadastrarLivro(new Livro(cod, tit, aut, ano, true));
                         }
+
                         case 2 -> {
                             System.out.print("Digite o ID do usuário: ");
-                            int id = Integer.parseInt(sc.nextLine());
+                            int id = lerInt(sc);
                             System.out.println(biblioteca.buscarUsuarioPorId(id));
                         }
+
                         case 3 -> {
                             System.out.print("Digite o nome ou parte dele: ");
-                            String nome = sc.nextLine();
+                            String nome = lerTexto(sc);
                             biblioteca.buscarUsuarioPorNome(nome);
                         }
+
                         case 4 -> {
                             System.out.print("Código do Livro: ");
-                            int codL = Integer.parseInt(sc.nextLine());
+                            int codL = lerInt(sc);
+
                             System.out.print("ID do Usuário: ");
-                            int idU = Integer.parseInt(sc.nextLine());
+                            int idU = lerInt(sc);
+
                             biblioteca.realizarEmprestimo(codL, idU);
                         }
+
                         case 5 -> {
                             System.out.print("Código do Livro para Devolução: ");
-                            int codL = Integer.parseInt(sc.nextLine());
+                            int codL = lerInt(sc);
                             biblioteca.realizarDevolucao(codL);
                         }
+
                         case 6 -> biblioteca.listarLivrosCadastrados();
+
                         case 7 -> biblioteca.listarLivrosEmprestados();
+
                         case 8 -> biblioteca.gravarDados();
+
                         case 9 -> {
                             usuarioLogado = null;
                             System.out.println("Logout efetuado.");
                         }
+
                         case 0 -> {
                             biblioteca.gravarDados();
                             opcaoSessao = 0;
                             System.out.println("Sistema encerrado.");
                         }
+
                         default -> System.out.println("Opção inválida!");
                     }
+
                 } catch (NumberFormatException e) {
                     System.out.println("[Erro] Entrada inválida.");
                 } catch (UsuarioNaoEncontradoException | LivroNaoEncontradoException | LivroIndisponivelException e) {
@@ -148,6 +183,7 @@ public class Main {
                 } catch (Exception e) {
                     System.out.println("[Erro Sistema] " + e.getMessage());
                 }
+
             } else if (usuarioLogado instanceof Estudante) {
                 System.out.println("\n===== MENU DISCENTE (ESTUDANTE) =====");
                 System.out.println("1. Buscar Livro por Código");
@@ -158,30 +194,37 @@ public class Main {
                 System.out.print("Escolha uma opção: ");
 
                 try {
-                    int op = Integer.parseInt(sc.nextLine());
+                    int op = lerInt(sc);
+
                     switch (op) {
                         case 1 -> {
                             System.out.print("Digite o código do livro: ");
-                            int cod = Integer.parseInt(sc.nextLine());
+                            int cod = lerInt(sc);
                             System.out.println(biblioteca.buscarLivroPorCodigo(cod));
                         }
+
                         case 2 -> {
                             System.out.print("Digite o autor ou parte dele: ");
-                            String autor = sc.nextLine();
+                            String autor = lerTexto(sc);
                             biblioteca.buscarLivroPorAutor(autor);
                         }
+
                         case 3 -> biblioteca.listarLivrosEmprestadosPorUsuario(usuarioLogado.getId());
+
                         case 4 -> {
                             usuarioLogado = null;
                             System.out.println("Logout efetuado.");
                         }
+
                         case 0 -> {
                             biblioteca.gravarDados();
                             opcaoSessao = 0;
                             System.out.println("Sistema encerrado.");
                         }
+
                         default -> System.out.println("Opção inválida!");
                     }
+
                 } catch (NumberFormatException e) {
                     System.out.println("[Erro] Entrada inválida.");
                 } catch (LivroNaoEncontradoException e) {
@@ -191,6 +234,15 @@ public class Main {
                 }
             }
         }
+
         sc.close();
+    }
+
+    private static String lerTexto(Scanner sc) {
+        return sc.nextLine().trim();
+    }
+
+    private static int lerInt(Scanner sc) {
+        return Integer.parseInt(lerTexto(sc));
     }
 }
