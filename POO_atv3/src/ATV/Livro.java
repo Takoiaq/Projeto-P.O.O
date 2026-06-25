@@ -5,14 +5,27 @@ public class Livro {
     private String titulo;
     private String autor;
     private int anop;
-    private boolean disp;
+    private int quantidade;
 
-    public Livro(int codigo, String titulo, String autor, int anop, boolean disp) {
+    public Livro(int codigo, String titulo, String autor, int anop, int quantidade) {
+        if (codigo < 0) {
+            throw new IllegalArgumentException("Código do livro não pode ser negativo.");
+        }
+
+        if (quantidade < 0) {
+            throw new IllegalArgumentException("Quantidade do livro não pode ser negativa.");
+        }
+
         this.codigo = codigo;
         this.titulo = normalizarTexto(titulo);
         this.autor = normalizarTexto(autor);
         this.anop = anop;
-        this.disp = disp;
+        this.quantidade = quantidade;
+    }
+
+    // Mantém compatibilidade com código antigo que usava true/false
+    public Livro(int codigo, String titulo, String autor, int anop, boolean disp) {
+        this(codigo, titulo, autor, anop, disp ? 1 : 0);
     }
 
     public int getCodigo() {
@@ -20,6 +33,10 @@ public class Livro {
     }
 
     public void setCodigo(int codigo) {
+        if (codigo < 0) {
+            throw new IllegalArgumentException("Código do livro não pode ser negativo.");
+        }
+
         this.codigo = codigo;
     }
 
@@ -47,12 +64,41 @@ public class Livro {
         this.anop = anop;
     }
 
-    public boolean isDisp() {
-        return disp;
+    public int getQuantidade() {
+        return quantidade;
     }
 
+    public void setQuantidade(int quantidade) {
+        if (quantidade < 0) {
+            throw new IllegalArgumentException("Quantidade do livro não pode ser negativa.");
+        }
+
+        this.quantidade = quantidade;
+    }
+
+    public boolean isDisp() {
+        return quantidade > 0;
+    }
+
+    public void emprestarUnidade() {
+        if (quantidade <= 0) {
+            throw new IllegalArgumentException("Não há unidades disponíveis deste livro.");
+        }
+
+        quantidade--;
+    }
+
+    public void devolverUnidade() {
+        quantidade++;
+    }
+
+    // Mantido só para não quebrar código antigo
     public void setDisp(boolean disp) {
-        this.disp = disp;
+        if (!disp) {
+            this.quantidade = 0;
+        } else if (this.quantidade == 0) {
+            this.quantidade = 1;
+        }
     }
 
     private String normalizarTexto(String texto) {
@@ -60,7 +106,7 @@ public class Livro {
     }
 
     public String toCsv() {
-        return codigo + ";" + titulo + ";" + autor + ";" + anop + ";" + disp;
+        return codigo + ";" + titulo + ";" + autor + ";" + anop + ";" + quantidade;
     }
 
     @Override
@@ -69,6 +115,6 @@ public class Livro {
                 " | Título: " + titulo +
                 " | Autor: " + autor +
                 " | Ano: " + anop +
-                " | Disponível: " + (disp ? "Sim" : "Não");
+                " | Quantidade disponível: " + quantidade;
     }
 }

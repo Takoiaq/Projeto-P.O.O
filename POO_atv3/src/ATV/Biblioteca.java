@@ -49,6 +49,11 @@ public class Biblioteca {
             return;
         }
 
+        if (livro.getQuantidade() < 0) {
+            System.out.println("[Erro] Quantidade do livro não pode ser negativa.");
+            return;
+        }
+
         try {
             buscarLivroPorCodigo(livro.getCodigo());
             System.out.println("[Erro] Este código de livro já está sendo usado / já existe no sistema.");
@@ -153,10 +158,12 @@ public class Biblioteca {
         Usuario usuario = buscarUsuarioPorId(idUsuario);
 
         if (!livro.isDisp()) {
-            throw new LivroIndisponivelException("O livro '" + livro.getTitulo() + "' já está emprestado.");
+            throw new LivroIndisponivelException(
+                    "O livro '" + livro.getTitulo() + "' não possui unidades disponíveis."
+            );
         }
 
-        livro.setDisp(false);
+        livro.emprestarUnidade();
 
         LocalDate dataEmprestimo = LocalDate.now();
         int diasPrazo = usuario.getPrazoEmprestimo();
@@ -165,6 +172,7 @@ public class Biblioteca {
         emprestimos.add(new Emprestimo(livro, usuario, dataEmprestimo, dataPrevistaDevolucao));
 
         System.out.println("Empréstimo realizado com sucesso! Devolução até: " + dataPrevistaDevolucao);
+        System.out.println("Quantidade restante do livro: " + livro.getQuantidade());
     }
 
     public void realizarDevolucao(int codigoLivro) throws LivroNaoEncontradoException {
@@ -183,14 +191,15 @@ public class Biblioteca {
         }
 
         if (emprestimoEncontrado == null) {
-            System.out.println("Aviso: O livro '" + livro.getTitulo() + "' já consta como disponível no sistema.");
+            System.out.println("Aviso: O livro '" + livro.getTitulo() + "' não possui empréstimo ativo no sistema.");
             return;
         }
 
-        emprestimoEncontrado.getLivro().setDisp(true);
+        emprestimoEncontrado.getLivro().devolverUnidade();
         emprestimos.remove(emprestimoEncontrado);
 
         System.out.println("Devolução do livro '" + livro.getTitulo() + "' realizada com sucesso!");
+        System.out.println("Quantidade atual do livro: " + livro.getQuantidade());
     }
 
     public void listarLivrosCadastrados() {
@@ -285,6 +294,7 @@ public class Biblioteca {
                     System.out.println("- Livro: " + livro.getTitulo());
                     System.out.println("  Código: " + livro.getCodigo());
                     System.out.println("  Autor: " + livro.getAutor());
+                    System.out.println("  Quantidade atual disponível: " + livro.getQuantidade());
                     System.out.println("  Data do empréstimo: " + emprestimo.getDataEmp());
                     System.out.println("  Devolução prevista: " + emprestimo.getDatadev());
 

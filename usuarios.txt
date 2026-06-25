@@ -1,0 +1,2 @@
+BIBLIOTECARIO;588156;Felipe Lima;felipelima088@gmail.com
+ESTUDANTE;588800;Lucas;Lucas@gmail.com
