@@ -12,6 +12,11 @@ public class Bibliotecario extends Usuario {
     }
 
     @Override
+    public String getTipo() {
+        return "BIBLIOTECARIO";
+    }
+
+    @Override
     public String toCsv() {
         return "BIBLIOTECARIO;" + getId() + ";" + getNome() + ";" + getEmail();
     }

@@ -13,7 +13,6 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.lang.reflect.Method;
 
 public class Main extends JFrame implements ActionListener {
     private Biblioteca biblioteca;
@@ -102,12 +101,12 @@ public class Main extends JFrame implements ActionListener {
         txQtd       = new JTextField();
         txIdUsuario = new JTextField();
 
-        painelSis.add(NTxt("Código do Livro:"));               painelSis.add(txCodLivro);
-        painelSis.add(NTxt("Título do Livro:"));               painelSis.add(txTitulo);
+        painelSis.add(NTxt("Codigo do Livro:"));               painelSis.add(txCodLivro);
+        painelSis.add(NTxt("Titulo do Livro:"));               painelSis.add(txTitulo);
         painelSis.add(NTxt("Autor:"));                         painelSis.add(txAutor);
         painelSis.add(NTxt("Ano de Publicação:"));             painelSis.add(txAno);
         painelSis.add(NTxt("Quantidade de Livros:"));          painelSis.add(txQtd);
-        painelSis.add(NTxt("ID do Usuário (Empréstimo):"));    painelSis.add(txIdUsuario);
+        painelSis.add(NTxt("ID do Usuário:"));                 painelSis.add(txIdUsuario);
 
         add(painelSis, BorderLayout.NORTH);
 
@@ -120,8 +119,8 @@ public class Main extends JFrame implements ActionListener {
 
         add(new JScrollPane(Console), BorderLayout.CENTER);
 
-        JPanel Botoes = new JPanel();
-        Botoes.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        JPanel botoes = new JPanel();
+        botoes.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         btCadastrarLivro = new JButton("Cadastrar Livro");
         btBuscarLivro    = new JButton("Buscar Livro");
@@ -138,27 +137,28 @@ public class Main extends JFrame implements ActionListener {
         btLogout.addActionListener(this);
 
         if (usuarioLogado instanceof Bibliotecario) {
-            Botoes.setLayout(new GridLayout(2, 3, 10, 10));
-            Botoes.add(btBuscarLivro);
-            Botoes.add(btListarTodos);
-            Botoes.add(btCadastrarLivro);
-            Botoes.add(btEmprestimo);
-            Botoes.add(btDevolucao);
-            Botoes.add(btLogout);
+            botoes.setLayout(new GridLayout(2, 3, 10, 10));
+            botoes.add(btBuscarLivro);
+            botoes.add(btListarTodos);
+            botoes.add(btCadastrarLivro);
+            botoes.add(btEmprestimo);
+            botoes.add(btDevolucao);
+            botoes.add(btLogout);
         } else {
-            txTitulo.setEditable(false);
-            txAutor.setEditable(false);
+            txCodLivro.setEditable(true);
+            txTitulo.setEditable(true);
+            txAutor.setEditable(true);
             txAno.setEditable(false);
             txQtd.setEditable(false);
             txIdUsuario.setEditable(false);
 
-            Botoes.setLayout(new GridLayout(1, 3, 10, 10));
-            Botoes.add(btBuscarLivro);
-            Botoes.add(btListarTodos);
-            Botoes.add(btLogout);
+            botoes.setLayout(new GridLayout(1, 3, 10, 10));
+            botoes.add(btBuscarLivro);
+            botoes.add(btListarTodos);
+            botoes.add(btLogout);
         }
 
-        add(Botoes, BorderLayout.SOUTH);
+        add(botoes, BorderLayout.SOUTH);
 
         revalidate();
         repaint();
@@ -171,7 +171,7 @@ public class Main extends JFrame implements ActionListener {
     }
 
     private void redirecionarConsole() {
-        OutputStream Out = new OutputStream() {
+        OutputStream out = new OutputStream() {
             @Override
             public void write(int b) throws IOException {
                 if (Console != null) {
@@ -180,8 +180,8 @@ public class Main extends JFrame implements ActionListener {
                 }
             }
         };
-        System.setOut(new PrintStream(Out, true));
-        System.setErr(new PrintStream(Out, true));
+        System.setOut(new PrintStream(out, true));
+        System.setErr(new PrintStream(out, true));
     }
 
     @Override
@@ -243,22 +243,14 @@ public class Main extends JFrame implements ActionListener {
 
         try {
             int idUsuario = Integer.parseInt(login);
-            Usuario usuario = buscarUsuarioPorId(idUsuario);
-
-            if (usuario == null) {
-                JOptionPane.showMessageDialog(null,
-                        "Usuário não encontrado.\nVerifique se o ID está cadastrado.",
-                        "Erro de Login", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
+            Usuario usuario = biblioteca.buscarUsuarioPorId(idUsuario);
             usuarioLogado = usuario;
             TelaSistema();
             System.out.println("Login realizado com sucesso: " + usuarioLogado);
         }
         catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(null,
-                    "Login inválido.\nUse admin/admin ou digite um ID numérico de usuário.",
+                    "Login inválido. Use admin/admin ou digite um ID numérico de usuário.",
                     "Erro de Login", JOptionPane.ERROR_MESSAGE);
         }
         catch (Exception ex) {
@@ -283,7 +275,7 @@ public class Main extends JFrame implements ActionListener {
             limparCampos();
         }
         catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(null, "Inválido! Preencha Código, Ano e Quantidade com números inteiros.", "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Inválido! Preencha Codigo, Ano e Quantidade com números inteiros.", "Erro", JOptionPane.ERROR_MESSAGE);
         }
         catch (IllegalArgumentException ex) {
             JOptionPane.showMessageDialog(null, ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
@@ -292,47 +284,59 @@ public class Main extends JFrame implements ActionListener {
 
     private void buscarLivro() {
         Console.setText("");
-        try {
-            int codLivro = Integer.parseInt(txCodLivro.getText().trim());
-            Object livro = buscarLivroPorCodigo(codLivro);
 
-            if (livro == null) {
-                JOptionPane.showMessageDialog(null, "Livro não encontrado.", "Erro", JOptionPane.ERROR_MESSAGE);
-                return;
+        String codigoTexto = txCodLivro.getText().trim();
+        String tituloTexto = txTitulo.getText().trim();
+        String autorTexto  = txAutor.getText().trim();
+
+        if (codigoTexto.isBlank() && tituloTexto.isBlank() && autorTexto.isBlank()) {
+            JOptionPane.showMessageDialog(null,
+                    "Preencha pelo menos um campo para buscar: Codigo, Titulo ou Autor.",
+                    "Erro", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        try {
+            if (!codigoTexto.isBlank()) {
+                int codLivro = Integer.parseInt(codigoTexto);
+                Livro livro = biblioteca.buscarLivroPorCodigo(codLivro);
+
+                System.out.println("=== Resultado por codigo ===");
+                System.out.println(livro);
             }
 
-            System.out.println(livro);
+            if (!tituloTexto.isBlank()) {
+                System.out.println("=== Resultado por titulo ===");
+                biblioteca.buscarLivroPorTitulo(tituloTexto);
+            }
+
+            if (!autorTexto.isBlank()) {
+                System.out.println("=== Resultado por autor ===");
+                biblioteca.buscarLivroPorAutor(autorTexto);
+            }
+
+            limparCamposBusca();
         }
         catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(null, "Digite o código do livro como número inteiro.", "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null,
+                    "O codigo do livro precisa ser um número inteiro.",
+                    "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+        catch (LivroNaoEncontradoException ex) {
+            JOptionPane.showMessageDialog(null,
+                    ex.getMessage(),
+                    "Livro não encontrado", JOptionPane.ERROR_MESSAGE);
         }
         catch (Exception ex) {
-            JOptionPane.showMessageDialog(null, ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null,
+                    ex.getMessage(),
+                    "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void listarLivros() {
         Console.setText("");
-        try {
-            boolean chamou = chamarMetodoSemParametro(
-                    "listarLivrosCadastrados",
-                    "listarTodos",
-                    "listarTodosLivros",
-                    "listarLivros",
-                    "listar",
-                    "exibirLivros"
-            );
-
-            if (!chamou) {
-                JOptionPane.showMessageDialog(null,
-                        "Não encontrei método de listagem na classe Biblioteca.\n" +
-                        "Crie um método como listarLivros() ou listarTodos().",
-                        "Erro", JOptionPane.ERROR_MESSAGE);
-            }
-        }
-        catch (Exception ex) {
-            JOptionPane.showMessageDialog(null, "Erro ao listar livros: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
-        }
+        biblioteca.listarLivrosCadastrados();
     }
 
     private void realizarEmprestimo() {
@@ -345,7 +349,7 @@ public class Main extends JFrame implements ActionListener {
             limparCampos();
         }
         catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(null, "Preencha os campos 'Código' e 'ID Usuário' com números.", "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Preencha os campos 'Codigo' e 'ID Usuário' com números.", "Erro", JOptionPane.ERROR_MESSAGE);
         }
         catch (LivroIndisponivelException | LivroNaoEncontradoException | UsuarioNaoEncontradoException ex) {
             JOptionPane.showMessageDialog(null, ex.getMessage(), "Erro de Regra de Negócio", JOptionPane.ERROR_MESSAGE);
@@ -358,12 +362,20 @@ public class Main extends JFrame implements ActionListener {
     private void realizarDevolucao() {
         try {
             int codLivro = Integer.parseInt(txCodLivro.getText().trim());
-            biblioteca.realizarDevolucao(codLivro);
+            String idTexto = txIdUsuario.getText().trim();
+
+            if (idTexto.isBlank()) {
+                biblioteca.realizarDevolucao(codLivro);
+            } else {
+                int idUsuario = Integer.parseInt(idTexto);
+                biblioteca.realizarDevolucao(codLivro, idUsuario);
+            }
+
             JOptionPane.showMessageDialog(null, "Devolução registrada com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
             limparCampos();
         }
         catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(null, "Preencha o Código do Livro para realizar a devolução.", "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Preencha o Codigo do Livro e, se necessário, o ID do Usuário com números.", "Erro", JOptionPane.ERROR_MESSAGE);
         }
         catch (Exception ex) {
             JOptionPane.showMessageDialog(null, ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
@@ -381,94 +393,10 @@ public class Main extends JFrame implements ActionListener {
         }
     }
 
-    private Usuario buscarUsuarioPorId(int idUsuario) throws Exception {
-        String[] nomesPossiveis = {
-                "buscarUsuarioPorId",
-                "buscarUsuarioPorID",
-                "buscarUsuario",
-                "buscarUsuarioPorCodigo",
-                "getUsuarioPorId",
-                "procurarUsuarioPorId"
-        };
-
-        for (String nomeMetodo : nomesPossiveis) {
-            try {
-                Method metodo = biblioteca.getClass().getMethod(nomeMetodo, int.class);
-                Object resultado = metodo.invoke(biblioteca, idUsuario);
-
-                if (resultado instanceof Usuario) {
-                    return (Usuario) resultado;
-                }
-
-                return null;
-            }
-            catch (NoSuchMethodException ignored) {
-            }
-            catch (Exception ex) {
-                Throwable causa = ex.getCause();
-                if (causa != null) {
-                    throw new Exception(causa.getMessage());
-                }
-                throw ex;
-            }
-        }
-
-        return null;
-    }
-
-    private Object buscarLivroPorCodigo(int codigo) throws Exception {
-        String[] nomesPossiveis = {
-                "buscarLivroPorCódigo",
-                "buscarLivroPorCodigo",
-                "buscarLivroPorId",
-                "buscarLivro",
-                "getLivroPorCodigo",
-                "procurarLivroPorCodigo"
-        };
-
-        for (String nomeMetodo : nomesPossiveis) {
-            try {
-                Method metodo = biblioteca.getClass().getMethod(nomeMetodo, int.class);
-                return metodo.invoke(biblioteca, codigo);
-            }
-            catch (NoSuchMethodException ignored) {
-            }
-            catch (Exception ex) {
-                Throwable causa = ex.getCause();
-                if (causa != null) {
-                    throw new Exception(causa.getMessage());
-                }
-                throw ex;
-            }
-        }
-
-        return null;
-    }
-
-    private boolean chamarMetodoSemParametro(String... nomesPossiveis) throws Exception {
-        for (String nomeMetodo : nomesPossiveis) {
-            try {
-                Method metodo = biblioteca.getClass().getMethod(nomeMetodo);
-                Object resultado = metodo.invoke(biblioteca);
-
-                if (resultado != null) {
-                    System.out.println(resultado);
-                }
-
-                return true;
-            }
-            catch (NoSuchMethodException ignored) {
-            }
-            catch (Exception ex) {
-                Throwable causa = ex.getCause();
-                if (causa != null) {
-                    throw new Exception(causa.getMessage());
-                }
-                throw ex;
-            }
-        }
-
-        return false;
+    private void limparCamposBusca() {
+        txCodLivro.setText("");
+        txTitulo.setText("");
+        txAutor.setText("");
     }
 
     private void limparCampos() {

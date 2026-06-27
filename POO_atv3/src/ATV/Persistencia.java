@@ -102,7 +102,8 @@ public class Persistencia {
                 int anoPublicacao = Integer.parseInt(tokens[3].trim());
                 int quantidade = parseQuantidadeLivro(tokens[4].trim());
 
-                validarCodigoNaoNegativo(codigo, "Código do livro");
+                validarCodigoNaoNegativo(codigo, "Codigo do livro");
+                validarQuantidadeNaoNegativa(quantidade, "Quantidade do livro");
 
                 lista.add(new Livro(codigo, titulo, autor, anoPublicacao, quantidade));
             }
@@ -176,7 +177,7 @@ public class Persistencia {
                 LocalDate dataEmprestimo = LocalDate.parse(tokens[2].trim());
                 LocalDate dataPrevistaDevolucao = LocalDate.parse(tokens[3].trim());
 
-                validarCodigoNaoNegativo(codigoLivro, "Código do livro");
+                validarCodigoNaoNegativo(codigoLivro, "Codigo do livro");
                 validarIdNaoNegativo(idUsuario, "ID de usuário");
 
                 Livro livro = acharLivro(livros, codigoLivro);
@@ -213,8 +214,14 @@ public class Persistencia {
         }
     }
 
+    private void validarQuantidadeNaoNegativa(int quantidade, String campo) {
+        if (quantidade < 0) {
+            throw new IllegalArgumentException(campo + " não pode ser negativa.");
+        }
+    }
+
     private int parseQuantidadeLivro(String valor) throws ArquivoInvalidoException {
-        valor = valor.trim();
+        valor = valor == null ? "" : valor.trim();
 
         if ("true".equalsIgnoreCase(valor)) {
             return 1;

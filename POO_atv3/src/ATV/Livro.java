@@ -9,7 +9,7 @@ public class Livro implements Interface {
 
     public Livro(int codigo, String titulo, String autor, int anop, int quantidade) {
         if (codigo < 0) {
-            throw new IllegalArgumentException("Código do livro não pode ser negativo.");
+            throw new IllegalArgumentException("Codigo do livro não pode ser negativo.");
         }
 
         if (quantidade < 0) {
@@ -33,7 +33,7 @@ public class Livro implements Interface {
 
     public void setCodigo(int codigo) {
         if (codigo < 0) {
-            throw new IllegalArgumentException("Código do livro não pode ser negativo.");
+            throw new IllegalArgumentException("Codigo do livro não pode ser negativo.");
         }
 
         this.codigo = codigo;
@@ -81,7 +81,7 @@ public class Livro implements Interface {
 
     public void emprestarUnidade() {
         if (quantidade <= 0) {
-            throw new IllegalArgumentException("Não há unidades disponíveis deste livro.");
+            return;
         }
 
         quantidade--;
@@ -110,8 +110,8 @@ public class Livro implements Interface {
 
     @Override
     public String toString() {
-        return "Código: " + codigo +
-                " | Título: " + titulo +
+        return "Codigo: " + codigo +
+                " | Titulo: " + titulo +
                 " | Autor: " + autor +
                 " | Ano: " + anop +
                 " | Quantidade disponível: " + quantidade;

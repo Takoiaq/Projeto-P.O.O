@@ -71,6 +71,19 @@ public abstract class Usuario implements Interface {
 
     public abstract int getPrazoEmprestimo();
 
+    public abstract String getTipo();
+
     @Override
-    public abstract String toCsv();
-}   
+    public String toCsv() {
+        return getTipo() + ";" + id + ";" + nome + ";" + email;
+    }
+
+    @Override
+    public String toString() {
+        return "Tipo: " + getTipo() +
+                " | ID: " + id +
+                " | Nome: " + nome +
+                " | Email: " + email +
+                " | Prazo: " + getPrazoEmprestimo() + " dias";
+    }
+}

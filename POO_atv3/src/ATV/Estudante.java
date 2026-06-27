@@ -12,6 +12,11 @@ public class Estudante extends Usuario {
     }
 
     @Override
+    public String getTipo() {
+        return "ESTUDANTE";
+    }
+
+    @Override
     public String toCsv() {
         return "ESTUDANTE;" + getId() + ";" + getNome() + ";" + getEmail();
     }
