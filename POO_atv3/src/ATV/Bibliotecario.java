@@ -13,11 +13,14 @@ public class Bibliotecario extends Usuario {
 
     @Override
     public String toCsv() {
-        return "BIBLIOTECARIO;" + id + ";" + nome + ";" + email;
+        return "BIBLIOTECARIO;" + getId() + ";" + getNome() + ";" + getEmail();
     }
 
     @Override
     public String toString() {
-        return "Bibliotecário [ID: " + getId() + " | Nome: " + getNome() + " | Email: " + getEmail() + "]";
+        return "Bibliotecário [ID: " + getId() +
+                " | Nome: " + getNome() +
+                " | Email: " + getEmail() +
+                " | Prazo: " + getPrazoEmprestimo() + " dias]";
     }
 }

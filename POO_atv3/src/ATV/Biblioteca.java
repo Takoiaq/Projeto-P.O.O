@@ -1,13 +1,12 @@
 package ATV;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-
 import ATV.Exception.ArquivoInvalidoException;
 import ATV.Exception.LivroIndisponivelException;
 import ATV.Exception.LivroNaoEncontradoException;
 import ATV.Exception.UsuarioNaoEncontradoException;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Biblioteca {
     private List<Livro> livros;
@@ -26,113 +25,104 @@ public class Biblioteca {
         this.persistencia = persistencia;
     }
 
-    public void gravarDados() throws ArquivoInvalidoException {
-        persistencia.gravarDados(livros, usuarios, emprestimos);
-        System.out.println("Dados salvos nos arquivos com sucesso!");
-    }
-
-    public void carregarDados() throws ArquivoInvalidoException {
-        Persistencia.DadosBiblioteca dados = persistencia.carregarDados();
-        livros = dados.getLivros();
-        usuarios = dados.getUsuarios();
-        emprestimos = dados.getEmprestimos();
-    }
-
     public void cadastrarLivro(Livro livro) {
         if (livro == null) {
-            System.out.println("[Erro] Livro inválido.");
-            return;
+            throw new IllegalArgumentException("Livro não pode ser nulo.");
         }
 
-        if (livro.getCodigo() < 0) {
-            System.out.println("[Erro] Código do livro não pode ser negativo.");
-            return;
+        for (Livro l : livros) {
+            if (l.getCodigo() == livro.getCodigo()) {
+                System.out.println("Código de livro já existe.");
+                return;
+            }
         }
 
-        if (livro.getQuantidade() < 0) {
-            System.out.println("[Erro] Quantidade do livro não pode ser negativa.");
-            return;
-        }
-
-        try {
-            buscarLivroPorCodigo(livro.getCodigo());
-            System.out.println("[Erro] Este código de livro já está sendo usado / já existe no sistema.");
-        } catch (LivroNaoEncontradoException e) {
-            livros.add(livro);
-            System.out.println("Livro cadastrado com sucesso!");
-        }
+        livros.add(livro);
+        System.out.println("Livro cadastrado: " + livro);
     }
 
     public void cadastrarUsuario(Usuario usuario) {
         if (usuario == null) {
-            System.out.println("[Erro] Usuário inválido.");
-            return;
+            throw new IllegalArgumentException("Usuário não pode ser nulo.");
         }
 
-        if (usuario.getId() < 0) {
-            System.out.println("[Erro] ID de usuário não pode ser negativo.");
-            return;
-        }
-
-        try {
-            buscarUsuarioPorId(usuario.getId());
-            System.out.println("[Erro] Este ID de usuário já está sendo usado / já existe no sistema.");
-        } catch (UsuarioNaoEncontradoException e) {
-            usuarios.add(usuario);
-            System.out.println("Usuário cadastrado com sucesso!");
-        }
-    }
-
-    public Usuario buscarUsuarioPorId(int id) throws UsuarioNaoEncontradoException {
-        if (id < 0) {
-            throw new UsuarioNaoEncontradoException("ID de usuário não pode ser negativo.");
-        }
-
-        for (Usuario usuario : usuarios) {
-            if (usuario.getId() == id) {
-                return usuario;
+        for (Usuario u : usuarios) {
+            if (u.getId() == usuario.getId()) {
+                System.out.println("ID de usuário já existe.");
+                return;
             }
         }
 
-        throw new UsuarioNaoEncontradoException("Usuário com ID " + id + " não existe no sistema.");
-    }
-
-    public void buscarUsuarioPorNome(String nome) {
-        String nomeBusca = nome == null ? "" : nome.trim();
-        boolean encontrado = false;
-
-        for (Usuario usuario : usuarios) {
-            if (usuario.getNome().toLowerCase().contains(nomeBusca.toLowerCase())) {
-                System.out.println(usuario);
-                encontrado = true;
-            }
-        }
-
-        if (!encontrado) {
-            System.out.println("Nenhum usuário encontrado com esse nome.");
-        }
+        usuarios.add(usuario);
+        System.out.println("Usuário cadastrado: " + usuario);
     }
 
     public Livro buscarLivroPorCodigo(int codigo) throws LivroNaoEncontradoException {
-        if (codigo < 0) {
-            throw new LivroNaoEncontradoException("Código do livro não pode ser negativo.");
-        }
-
         for (Livro livro : livros) {
             if (livro.getCodigo() == codigo) {
                 return livro;
             }
         }
 
-        throw new LivroNaoEncontradoException("Livro com código " + codigo + " não existe no sistema.");
+        throw new LivroNaoEncontradoException("Livro não encontrado com código: " + codigo);
     }
 
-    public void buscarLivroPorAutor(String autor) {
-        String autorBusca = autor == null ? "" : autor.trim();
+    public Livro buscarLivroPorCódigo(int codigo) throws LivroNaoEncontradoException {
+        return buscarLivroPorCodigo(codigo);
+    }
+
+    public Usuario buscarUsuarioPorId(int id) throws UsuarioNaoEncontradoException {
+        for (Usuario usuario : usuarios) {
+            if (usuario.getId() == id) {
+                return usuario;
+            }
+        }
+
+        throw new UsuarioNaoEncontradoException("Usuário não encontrado com ID: " + id);
+    }
+
+    public Usuario buscarUsuarioPorID(int id) throws UsuarioNaoEncontradoException {
+        return buscarUsuarioPorId(id);
+    }
+
+    public Usuario buscarUsuario(int id) throws UsuarioNaoEncontradoException {
+        return buscarUsuarioPorId(id);
+    }
+
+    public void buscarLivroPorTitulo(String titulo) {
+        String busca = titulo == null ? "" : titulo.trim().toLowerCase();
+
+        if (busca.isBlank()) {
+            System.out.println("Digite um título para buscar.");
+            return;
+        }
+
         boolean encontrado = false;
 
         for (Livro livro : livros) {
-            if (livro.getAutor().toLowerCase().contains(autorBusca.toLowerCase())) {
+            if (livro.getTitulo().toLowerCase().contains(busca)) {
+                System.out.println(livro);
+                encontrado = true;
+            }
+        }
+
+        if (!encontrado) {
+            System.out.println("Nenhum livro encontrado com esse título.");
+        }
+    }
+
+    public void buscarLivroPorAutor(String autor) {
+        String busca = autor == null ? "" : autor.trim().toLowerCase();
+
+        if (busca.isBlank()) {
+            System.out.println("Digite um autor para buscar.");
+            return;
+        }
+
+        boolean encontrado = false;
+
+        for (Livro livro : livros) {
+            if (livro.getAutor().toLowerCase().contains(busca)) {
                 System.out.println(livro);
                 encontrado = true;
             }
@@ -143,62 +133,48 @@ public class Biblioteca {
         }
     }
 
+    public void listarLivrosCadastrados() {
+        if (livros.isEmpty()) {
+            System.out.println("Nenhum livro cadastrado.");
+            return;
+        }
+
+        System.out.println("=== LIVROS CADASTRADOS ===");
+
+        for (Livro livro : livros) {
+            System.out.println(livro);
+        }
+    }
+
+    public void listarTodos() {
+        listarLivrosCadastrados();
+    }
+
+    public void listarLivros() {
+        listarLivrosCadastrados();
+    }
+
     public void realizarEmprestimo(int codigoLivro, int idUsuario)
             throws LivroNaoEncontradoException, UsuarioNaoEncontradoException, LivroIndisponivelException {
-
-        if (codigoLivro < 0) {
-            throw new LivroNaoEncontradoException("Código do livro não pode ser negativo.");
-        }
-
-        if (idUsuario < 0) {
-            throw new UsuarioNaoEncontradoException("ID de usuário não pode ser negativo.");
-        }
 
         Livro livro = buscarLivroPorCodigo(codigoLivro);
         Usuario usuario = buscarUsuarioPorId(idUsuario);
 
-        if (usuarioJaPegouEsseLivro(idUsuario, codigoLivro)) {
-            throw new LivroIndisponivelException(
-                    "Este usuário já possui um empréstimo ativo deste livro. " +
-                    "Ele precisa devolver antes de pegar outro exemplar do mesmo ID."
-            );
-        }
-
         if (!livro.isDisp()) {
-            throw new LivroIndisponivelException(
-                    "O livro '" + livro.getTitulo() + "' não possui unidades disponíveis."
-            );
+            throw new LivroIndisponivelException("Livro indisponível para empréstimo.");
         }
 
         livro.emprestarUnidade();
 
-        LocalDate dataEmprestimo = LocalDate.now();
-        int diasPrazo = usuario.getPrazoEmprestimo();
-        LocalDate dataPrevistaDevolucao = dataEmprestimo.plusDays(diasPrazo);
+        Emprestimo emprestimo = new Emprestimo(livro, usuario);
+        emprestimos.add(emprestimo);
 
-        emprestimos.add(new Emprestimo(livro, usuario, dataEmprestimo, dataPrevistaDevolucao));
-
-        System.out.println("Empréstimo realizado com sucesso! Devolução até: " + dataPrevistaDevolucao);
-        System.out.println("Quantidade restante do livro: " + livro.getQuantidade());
-    }
-
-    private boolean usuarioJaPegouEsseLivro(int idUsuario, int codigoLivro) {
-        for (Emprestimo emprestimo : emprestimos) {
-            if (emprestimo.getUsuario().getId() == idUsuario &&
-                    emprestimo.getLivro().getCodigo() == codigoLivro) {
-                return true;
-            }
-        }
-
-        return false;
+        System.out.println("Empréstimo realizado: " + emprestimo);
     }
 
     public void realizarDevolucao(int codigoLivro) throws LivroNaoEncontradoException {
-        if (codigoLivro < 0) {
-            throw new LivroNaoEncontradoException("Código do livro não pode ser negativo.");
-        }
-
         Livro livro = buscarLivroPorCodigo(codigoLivro);
+
         Emprestimo emprestimoEncontrado = null;
 
         for (Emprestimo emprestimo : emprestimos) {
@@ -209,173 +185,36 @@ public class Biblioteca {
         }
 
         if (emprestimoEncontrado == null) {
-            System.out.println("Aviso: O livro '" + livro.getTitulo() + "' não possui empréstimo ativo no sistema.");
-            return;
+            throw new IllegalArgumentException("Não existe empréstimo aberto para este livro.");
         }
 
-        emprestimoEncontrado.getLivro().devolverUnidade();
         emprestimos.remove(emprestimoEncontrado);
+        livro.devolverUnidade();
 
-        System.out.println("Devolução do livro '" + livro.getTitulo() + "' realizada com sucesso!");
-        System.out.println("Quantidade atual do livro: " + livro.getQuantidade());
+        System.out.println("Devolução realizada do livro: " + livro.getTitulo());
     }
 
-    public void listarLivrosCadastrados() {
-        if (livros.isEmpty()) {
-            System.out.println("Nenhum livro cadastrado.");
-            return;
-        }
+    public void carregarDados() throws ArquivoInvalidoException {
+        Persistencia.DadosBiblioteca dados = persistencia.carregarDados();
 
-        livros.forEach(System.out::println);
+        this.livros = dados.getLivros();
+        this.usuarios = dados.getUsuarios();
+        this.emprestimos = dados.getEmprestimos();
     }
 
-    public void listarLivrosDisponiveis() {
-        boolean possui = false;
-
-        for (Livro livro : livros) {
-            if (livro.isDisp()) {
-                System.out.println(livro);
-                possui = true;
-            }
-        }
-
-        if (!possui) {
-            System.out.println("Não há livros disponíveis no momento.");
-        }
+    public void gravarDados() throws ArquivoInvalidoException {
+        persistencia.gravarDados(livros, usuarios, emprestimos);
     }
 
-    public void listarLivrosEmprestados() {
-        if (emprestimos.isEmpty()) {
-            System.out.println("Nenhum livro emprestado atualmente.");
-            return;
-        }
-
-        emprestimos.forEach(System.out::println);
+    public List<Livro> getLivros() {
+        return livros;
     }
 
-    public void listarLivrosEmprestadosPorUsuario(int idUsuario) {
-        if (idUsuario < 0) {
-            System.out.println("[Erro] ID de usuário não pode ser negativo.");
-            return;
-        }
-
-        boolean possui = false;
-
-        for (Emprestimo emprestimo : emprestimos) {
-            if (emprestimo.getUsuario().getId() == idUsuario) {
-                System.out.println(emprestimo.getLivro());
-                possui = true;
-            }
-        }
-
-        if (!possui) {
-            System.out.println("Este usuário não possui empréstimos ativos.");
-        }
+    public List<Usuario> getUsuarios() {
+        return usuarios;
     }
 
-    public void listarUsuariosComEmprestimos() {
-        if (usuarios.isEmpty()) {
-            System.out.println("Nenhum usuário cadastrado.");
-            return;
-        }
-
-        System.out.println("\n===== USUÁRIOS CADASTRADOS E EMPRÉSTIMOS =====");
-
-        for (Usuario usuario : usuarios) {
-            String tipoUsuario;
-
-            if (usuario instanceof Bibliotecario) {
-                tipoUsuario = "Bibliotecário";
-            } else if (usuario instanceof Estudante) {
-                tipoUsuario = "Estudante";
-            } else {
-                tipoUsuario = "Usuário";
-            }
-
-            System.out.println("\n----------------------------------------");
-            System.out.println("Tipo: " + tipoUsuario);
-            System.out.println("ID: " + usuario.getId());
-            System.out.println("Nome: " + usuario.getNome());
-            System.out.println("Email: " + usuario.getEmail());
-            System.out.println("Prazo de empréstimo: " + usuario.getPrazoEmprestimo() + " dias");
-
-            boolean possuiEmprestimo = false;
-
-            for (Emprestimo emprestimo : emprestimos) {
-                if (emprestimo.getUsuario().getId() == usuario.getId()) {
-                    Livro livro = emprestimo.getLivro();
-
-                    if (!possuiEmprestimo) {
-                        System.out.println("Empréstimos:");
-                    }
-
-                    System.out.println("- Livro: " + livro.getTitulo());
-                    System.out.println("  Código: " + livro.getCodigo());
-                    System.out.println("  Autor: " + livro.getAutor());
-                    System.out.println("  Quantidade atual disponível: " + livro.getQuantidade());
-                    System.out.println("  Data do empréstimo: " + emprestimo.getDataEmp());
-                    System.out.println("  Devolução prevista: " + emprestimo.getDatadev());
-
-                    possuiEmprestimo = true;
-                }
-            }
-
-            if (!possuiEmprestimo) {
-                System.out.println("Empréstimos: nenhum empréstimo ativo.");
-            }
-        }
-
-        System.out.println("----------------------------------------");
-    }
-
-    public void adicionarQuantidadeLivro(int codigoLivro, int quantidade)
-            throws LivroNaoEncontradoException {
-
-        if (codigoLivro < 0) {
-            throw new LivroNaoEncontradoException("Código do livro não pode ser negativo.");
-        }
-
-        if (quantidade <= 0) {
-            System.out.println("[Erro] A quantidade para adicionar deve ser maior que zero.");
-            return;
-        }
-
-        Livro livro = buscarLivroPorCodigo(codigoLivro);
-
-        int novaQuantidade = livro.getQuantidade() + quantidade;
-        livro.setQuantidade(novaQuantidade);
-
-        System.out.println("Quantidade adicionada com sucesso!");
-        System.out.println("Livro: " + livro.getTitulo());
-        System.out.println("Quantidade atual disponível: " + livro.getQuantidade());
-    }
-
-    public void removerQuantidadeLivro(int codigoLivro, int quantidade)
-            throws LivroNaoEncontradoException {
-
-        if (codigoLivro < 0) {
-            throw new LivroNaoEncontradoException("Código do livro não pode ser negativo.");
-        }
-
-        if (quantidade <= 0) {
-            System.out.println("[Erro] A quantidade para remover deve ser maior que zero.");
-            return;
-        }
-
-        Livro livro = buscarLivroPorCodigo(codigoLivro);
-
-        if (quantidade > livro.getQuantidade()) {
-            System.out.println("[Erro] Não é possível remover mais livros do que a quantidade disponível.");
-            System.out.println("Livro: " + livro.getTitulo());
-            System.out.println("Quantidade atual disponível: " + livro.getQuantidade());
-            return;
-        }
-
-        int novaQuantidade = livro.getQuantidade() - quantidade;
-        livro.setQuantidade(novaQuantidade);
-
-        System.out.println("Quantidade removida com sucesso!");
-        System.out.println("Livro: " + livro.getTitulo());
-        System.out.println("Quantidade atual disponível: " + livro.getQuantidade());
+    public List<Emprestimo> getEmprestimos() {
+        return emprestimos;
     }
 }

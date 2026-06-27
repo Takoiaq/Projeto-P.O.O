@@ -1,317 +1,486 @@
 package ATV;
 
-import java.util.Scanner;
-
 import ATV.Exception.ArquivoInvalidoException;
 import ATV.Exception.LivroIndisponivelException;
 import ATV.Exception.LivroNaoEncontradoException;
 import ATV.Exception.UsuarioNaoEncontradoException;
 
-public class Main {
-    private static final String USUARIO_ADMIN = "admin";
-    private static final String SENHA_ADMIN = "admin";
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.lang.reflect.Method;
 
-    public static void main(String[] args) {
-        Biblioteca biblioteca = new Biblioteca();
-        Scanner sc = new Scanner(System.in);
+public class Main extends JFrame implements ActionListener {
+    private Biblioteca biblioteca;
+    private Usuario usuarioLogado = null;
 
+    private JTextArea Console;
+
+    private JTextField txLogin, txCodLivro, txTitulo, txAutor, txAno, txQtd, txIdUsuario;
+    private JPasswordField txSenha;
+    private JButton btLogin, btSair, btCadastrarLivro, btBuscarLivro, btListarTodos, btEmprestimo, btDevolucao, btLogout;
+
+    public Main() {
         try {
+            biblioteca = new Biblioteca();
             biblioteca.carregarDados();
-            System.out.println("[Sistema] Histórico e dados carregados automaticamente.");
-        } catch (ArquivoInvalidoException e) {
-            System.out.println("[Aviso] Iniciando sem registros prévios: " + e.getMessage());
+        }
+        catch (ArquivoInvalidoException e) {
+            System.out.println("Aviso: " + e.getMessage());
+        }
+        catch (Exception e) {
+            System.out.println("ERRO CRÍTICO");
+            e.printStackTrace();
         }
 
-        Usuario usuarioLogado = null;
-        int opcaoSessao = -1;
+        setTitle("Sistema de Gestão de Biblioteca");
+        setSize(800, 600);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        while (opcaoSessao != 0) {
-            if (usuarioLogado == null) {
-                System.out.println("\n===== BEM-VINDO À BIBLIOTECA =====");
-                System.out.println("1. Fazer Login");
-                System.out.println("2. Listar Livros Disponíveis");
-                System.out.println("0. Salvar e Sair do Sistema");
-                System.out.print("Escolha uma opção: ");
+        TelaLog();
+        setVisible(true);
+    }
 
-                try {
-                    opcaoSessao = lerInt(sc);
+    private void TelaLog() {
+        getContentPane().removeAll();
+        setLayout(new BorderLayout());
 
-                    switch (opcaoSessao) {
-                        case 1 -> {
-                            System.out.println("\n--- LOGIN ---");
-                            System.out.print("Usuário: ");
-                            String login = lerTexto(sc);
+        JPanel painelLogin = new JPanel();
+        painelLogin.setLayout(new GridLayout(3, 2, 10, 10));
+        painelLogin.setBackground(Color.WHITE);
+        painelLogin.setBorder(BorderFactory.createEmptyBorder(100, 200, 100, 200));
 
-                            System.out.print("Senha: ");
-                            String senha = lerTexto(sc);
+        JLabel lblLogin = new JLabel("Login / ID do Usuário:");
+        lblLogin.setFont(new Font("Arial", Font.BOLD, 14));
+        txLogin = new JTextField();
 
-                            if (login.equals(USUARIO_ADMIN) && senha.equals(SENHA_ADMIN)) {
-                                usuarioLogado = new Bibliotecario(0, "Administrador", "admin@biblioteca.com");
-                                System.out.println("Login realizado com sucesso! Bem-vindo, Administrador.");
+        JLabel lblSenha = new JLabel("Senha:");
+        lblSenha.setFont(new Font("Arial", Font.BOLD, 14));
+        txSenha = new JPasswordField();
 
-                            } else {
-                                try {
-                                    int id = Integer.parseInt(login.trim());
+        btLogin = new JButton("Login");
+        btSair = new JButton("Sair");
 
-                                    if (id < 0) {
-                                        throw new IllegalArgumentException("ID de usuário não pode ser negativo.");
-                                    }
+        btLogin.addActionListener(this);
+        btSair.addActionListener(this);
 
-                                    usuarioLogado = biblioteca.buscarUsuarioPorId(id);
-                                    System.out.println("Login realizado com sucesso! Bem-vindo, " + usuarioLogado.getNome());
+        painelLogin.add(lblLogin);
+        painelLogin.add(txLogin);
+        painelLogin.add(lblSenha);
+        painelLogin.add(txSenha);
+        painelLogin.add(btLogin);
+        painelLogin.add(btSair);
 
-                                } catch (NumberFormatException e) {
-                                    System.out.println("[Erro] Usuário ou senha incorretos.");
-                                } catch (UsuarioNaoEncontradoException e) {
-                                    System.out.println("[Erro] Usuário ou senha incorretos.");
-                                } catch (IllegalArgumentException e) {
-                                    System.out.println("[Erro] " + e.getMessage());
-                                }
-                            }
-                        }
+        add(painelLogin, BorderLayout.CENTER);
+        revalidate();
+        repaint();
+    }
 
-                        case 2 -> biblioteca.listarLivrosDisponiveis();
+    private void TelaSistema() {
+        getContentPane().removeAll();
+        setLayout(new BorderLayout());
 
-                        case 0 -> {
-                            biblioteca.gravarDados();
-                            System.out.println("Sistema encerrado.");
-                        }
+        JPanel painelSis = new JPanel();
+        painelSis.setLayout(new GridLayout(6, 2, 10, 10));
+        painelSis.setBackground(Color.WHITE);
 
-                        default -> System.out.println("Opção inválida!");
-                    }
+        TitledBorder border = BorderFactory.createTitledBorder("Sistema de Biblioteca");
+        border.setTitleFont(new Font("Arial", Font.BOLD, 16));
+        border.setTitleColor(Color.LIGHT_GRAY);
+        painelSis.setBorder(border);
 
-                } catch (NumberFormatException e) {
-                    System.out.println("[Erro] Entrada inválida. Insira um número.");
-                } catch (IllegalArgumentException e) {
-                    System.out.println("[Erro] " + e.getMessage());
-                } catch (Exception e) {
-                    System.out.println("[Erro] " + e.getMessage());
+        txCodLivro  = new JTextField();
+        txTitulo    = new JTextField();
+        txAutor     = new JTextField();
+        txAno       = new JTextField();
+        txQtd       = new JTextField();
+        txIdUsuario = new JTextField();
+
+        painelSis.add(NTxt("Código do Livro:"));               painelSis.add(txCodLivro);
+        painelSis.add(NTxt("Título do Livro:"));               painelSis.add(txTitulo);
+        painelSis.add(NTxt("Autor:"));                         painelSis.add(txAutor);
+        painelSis.add(NTxt("Ano de Publicação:"));             painelSis.add(txAno);
+        painelSis.add(NTxt("Quantidade de Livros:"));          painelSis.add(txQtd);
+        painelSis.add(NTxt("ID do Usuário (Empréstimo):"));    painelSis.add(txIdUsuario);
+
+        add(painelSis, BorderLayout.NORTH);
+
+        Console = new JTextArea();
+        Console.setEditable(false);
+        Console.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        Console.setBackground(Color.BLACK);
+        Console.setForeground(Color.GREEN);
+        redirecionarConsole();
+
+        add(new JScrollPane(Console), BorderLayout.CENTER);
+
+        JPanel Botoes = new JPanel();
+        Botoes.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        btCadastrarLivro = new JButton("Cadastrar Livro");
+        btBuscarLivro    = new JButton("Buscar Livro");
+        btListarTodos    = new JButton("Listar Todos");
+        btEmprestimo     = new JButton("Realizar Empréstimo");
+        btDevolucao      = new JButton("Realizar Devolução");
+        btLogout         = new JButton("Terminar Sessão");
+
+        btCadastrarLivro.addActionListener(this);
+        btBuscarLivro.addActionListener(this);
+        btListarTodos.addActionListener(this);
+        btEmprestimo.addActionListener(this);
+        btDevolucao.addActionListener(this);
+        btLogout.addActionListener(this);
+
+        if (usuarioLogado instanceof Bibliotecario) {
+            Botoes.setLayout(new GridLayout(2, 3, 10, 10));
+            Botoes.add(btBuscarLivro);
+            Botoes.add(btListarTodos);
+            Botoes.add(btCadastrarLivro);
+            Botoes.add(btEmprestimo);
+            Botoes.add(btDevolucao);
+            Botoes.add(btLogout);
+        } else {
+            txTitulo.setEditable(false);
+            txAutor.setEditable(false);
+            txAno.setEditable(false);
+            txQtd.setEditable(false);
+            txIdUsuario.setEditable(false);
+
+            Botoes.setLayout(new GridLayout(1, 3, 10, 10));
+            Botoes.add(btBuscarLivro);
+            Botoes.add(btListarTodos);
+            Botoes.add(btLogout);
+        }
+
+        add(Botoes, BorderLayout.SOUTH);
+
+        revalidate();
+        repaint();
+    }
+
+    private JLabel NTxt(String texto) {
+        JLabel label = new JLabel(texto);
+        label.setFont(new Font("Arial", Font.BOLD, 14));
+        return label;
+    }
+
+    private void redirecionarConsole() {
+        OutputStream Out = new OutputStream() {
+            @Override
+            public void write(int b) throws IOException {
+                if (Console != null) {
+                    Console.append(String.valueOf((char) b));
+                    Console.setCaretPosition(Console.getDocument().getLength());
+                }
+            }
+        };
+        System.setOut(new PrintStream(Out, true));
+        System.setErr(new PrintStream(Out, true));
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == btSair) {
+            int resposta = JOptionPane.showConfirmDialog(null, "Irá sair mesmo?", "Sair", JOptionPane.YES_NO_OPTION);
+            if (resposta == JOptionPane.YES_OPTION) {
+                salvarDados();
+                System.exit(0);
+            }
+        }
+        else if (e.getSource() == btLogin) {
+            fazerLogin();
+        }
+        else if (e.getSource() == btLogout) {
+            salvarDados();
+            usuarioLogado = null;
+            TelaLog();
+        }
+        else if (e.getSource() == btCadastrarLivro) {
+            cadastrarLivro();
+        }
+        else if (e.getSource() == btBuscarLivro) {
+            buscarLivro();
+        }
+        else if (e.getSource() == btListarTodos) {
+            listarLivros();
+        }
+        else if (e.getSource() == btEmprestimo) {
+            realizarEmprestimo();
+        }
+        else if (e.getSource() == btDevolucao) {
+            realizarDevolucao();
+        }
+    }
+
+    private void fazerLogin() {
+        String login = txLogin.getText().trim();
+        String senha = new String(txSenha.getPassword()).trim();
+
+        if (login.isBlank()) {
+            JOptionPane.showMessageDialog(null, "Digite o login ou o ID do usuário.", "Erro", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (login.equalsIgnoreCase("admin") && senha.equals("admin")) {
+            usuarioLogado = new Bibliotecario(1, "Administrador", "admin@email.com");
+            TelaSistema();
+            System.out.println("Login de administrador realizado com sucesso.");
+            return;
+        }
+
+        if (!senha.isBlank()) {
+            JOptionPane.showMessageDialog(null,
+                    "Login inválido.\nPara administrador use: admin / admin\nPara usuário comum, informe apenas o ID e deixe a senha vazia.",
+                    "Erro de Login", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        try {
+            int idUsuario = Integer.parseInt(login);
+            Usuario usuario = buscarUsuarioPorId(idUsuario);
+
+            if (usuario == null) {
+                JOptionPane.showMessageDialog(null,
+                        "Usuário não encontrado.\nVerifique se o ID está cadastrado.",
+                        "Erro de Login", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            usuarioLogado = usuario;
+            TelaSistema();
+            System.out.println("Login realizado com sucesso: " + usuarioLogado);
+        }
+        catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(null,
+                    "Login inválido.\nUse admin/admin ou digite um ID numérico de usuário.",
+                    "Erro de Login", JOptionPane.ERROR_MESSAGE);
+        }
+        catch (Exception ex) {
+            JOptionPane.showMessageDialog(null,
+                    "Erro ao fazer login: " + ex.getMessage(),
+                    "Erro de Login", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void cadastrarLivro() {
+        Console.setText("");
+        try {
+            int codigo    = Integer.parseInt(txCodLivro.getText().trim());
+            String titulo = txTitulo.getText().trim();
+            String autor  = txAutor.getText().trim();
+            int ano       = Integer.parseInt(txAno.getText().trim());
+            int qtd       = Integer.parseInt(txQtd.getText().trim());
+
+            Livro livro = new Livro(codigo, titulo, autor, ano, qtd);
+            biblioteca.cadastrarLivro(livro);
+            JOptionPane.showMessageDialog(null, "Livro registrado com sucesso", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+            limparCampos();
+        }
+        catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(null, "Inválido! Preencha Código, Ano e Quantidade com números inteiros.", "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+        catch (IllegalArgumentException ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void buscarLivro() {
+        Console.setText("");
+        try {
+            int codLivro = Integer.parseInt(txCodLivro.getText().trim());
+            Object livro = buscarLivroPorCodigo(codLivro);
+
+            if (livro == null) {
+                JOptionPane.showMessageDialog(null, "Livro não encontrado.", "Erro", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            System.out.println(livro);
+        }
+        catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(null, "Digite o código do livro como número inteiro.", "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+        catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void listarLivros() {
+        Console.setText("");
+        try {
+            boolean chamou = chamarMetodoSemParametro(
+                    "listarLivrosCadastrados",
+                    "listarTodos",
+                    "listarTodosLivros",
+                    "listarLivros",
+                    "listar",
+                    "exibirLivros"
+            );
+
+            if (!chamou) {
+                JOptionPane.showMessageDialog(null,
+                        "Não encontrei método de listagem na classe Biblioteca.\n" +
+                        "Crie um método como listarLivros() ou listarTodos().",
+                        "Erro", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+        catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "Erro ao listar livros: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void realizarEmprestimo() {
+        try {
+            int codLivro   = Integer.parseInt(txCodLivro.getText().trim());
+            int idUsuario  = Integer.parseInt(txIdUsuario.getText().trim());
+
+            biblioteca.realizarEmprestimo(codLivro, idUsuario);
+            JOptionPane.showMessageDialog(null, "Empréstimo realizado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+            limparCampos();
+        }
+        catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(null, "Preencha os campos 'Código' e 'ID Usuário' com números.", "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+        catch (LivroIndisponivelException | LivroNaoEncontradoException | UsuarioNaoEncontradoException ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "Erro de Regra de Negócio", JOptionPane.ERROR_MESSAGE);
+        }
+        catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void realizarDevolucao() {
+        try {
+            int codLivro = Integer.parseInt(txCodLivro.getText().trim());
+            biblioteca.realizarDevolucao(codLivro);
+            JOptionPane.showMessageDialog(null, "Devolução registrada com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+            limparCampos();
+        }
+        catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(null, "Preencha o Código do Livro para realizar a devolução.", "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+        catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void salvarDados() {
+        try {
+            biblioteca.gravarDados();
+        }
+        catch (Exception ex) {
+            JOptionPane.showMessageDialog(null,
+                    "Não foi possível salvar os dados: " + ex.getMessage(),
+                    "Erro ao Salvar", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private Usuario buscarUsuarioPorId(int idUsuario) throws Exception {
+        String[] nomesPossiveis = {
+                "buscarUsuarioPorId",
+                "buscarUsuarioPorID",
+                "buscarUsuario",
+                "buscarUsuarioPorCodigo",
+                "getUsuarioPorId",
+                "procurarUsuarioPorId"
+        };
+
+        for (String nomeMetodo : nomesPossiveis) {
+            try {
+                Method metodo = biblioteca.getClass().getMethod(nomeMetodo, int.class);
+                Object resultado = metodo.invoke(biblioteca, idUsuario);
+
+                if (resultado instanceof Usuario) {
+                    return (Usuario) resultado;
                 }
 
-            } else if (usuarioLogado instanceof Bibliotecario) {
-                System.out.println("\n===== MENU BIBLIOTECÁRIO =====");
-                System.out.println("1. Cadastrar Livro");
-                System.out.println("2. Buscar Usuário por ID");
-                System.out.println("3. Buscar Usuário por Nome");
-                System.out.println("4. Realizar Empréstimo");
-                System.out.println("5. Realizar Devolução");
-                System.out.println("6. Listar Todos os Livros");
-                System.out.println("7. Listar Livros Emprestados");
-                System.out.println("8. Listar Usuários e Empréstimos");
-                System.out.println("9. Gravar Dados Agora");
-                System.out.println("10. Logout (Trocar de Usuário)");
-                System.out.println("11. Cadastrar Novo Usuário");
-                System.out.println("12. Alterar Quantidade de Livro");
-                System.out.println("0. Salvar e Sair");
-                System.out.print("Escolha uma opção: ");
-
-                try {
-                    int op = lerInt(sc);
-
-                    switch (op) {
-                        case 1 -> {
-                            System.out.print("Código do Livro (int): ");
-                            int cod = lerIntNaoNegativo(sc, "Código do livro");
-
-                            System.out.print("Título: ");
-                            String tit = lerTexto(sc);
-
-                            System.out.print("Autor: ");
-                            String aut = lerTexto(sc);
-
-                            System.out.print("Ano de Publicação: ");
-                            int ano = lerIntNaoNegativo(sc, "Ano de publicação");
-
-                            System.out.print("Quantidade disponível: ");
-                            int quantidade = lerIntNaoNegativo(sc, "Quantidade do livro");
-
-                            biblioteca.cadastrarLivro(new Livro(cod, tit, aut, ano, quantidade));
-                        }
-
-                        case 2 -> {
-                            System.out.print("Digite o ID do usuário: ");
-                            int id = lerIntNaoNegativo(sc, "ID de usuário");
-                            System.out.println(biblioteca.buscarUsuarioPorId(id));
-                        }
-
-                        case 3 -> {
-                            System.out.print("Digite o nome ou parte dele: ");
-                            String nome = lerTexto(sc);
-                            biblioteca.buscarUsuarioPorNome(nome);
-                        }
-
-                        case 4 -> {
-                            System.out.print("Código do Livro: ");
-                            int codL = lerIntNaoNegativo(sc, "Código do livro");
-
-                            System.out.print("ID do Usuário: ");
-                            int idU = lerIntNaoNegativo(sc, "ID de usuário");
-
-                            biblioteca.realizarEmprestimo(codL, idU);
-                        }
-
-                        case 5 -> {
-                            System.out.print("Código do Livro para Devolução: ");
-                            int codL = lerIntNaoNegativo(sc, "Código do livro");
-                            biblioteca.realizarDevolucao(codL);
-                        }
-
-                        case 6 -> biblioteca.listarLivrosCadastrados();
-
-                        case 7 -> biblioteca.listarLivrosEmprestados();
-
-                        case 8 -> biblioteca.listarUsuariosComEmprestimos();
-
-                        case 9 -> biblioteca.gravarDados();
-
-                        case 10 -> {
-                            usuarioLogado = null;
-                            System.out.println("Logout efetuado.");
-                        }
-
-                        case 11 -> {
-                            System.out.println("\n--- Tipo de Cadastro ---");
-                            System.out.println("1. Estudante");
-                            System.out.println("2. Bibliotecário");
-                            System.out.print("Escolha o tipo: ");
-
-                            int tipo = lerInt(sc);
-
-                            if (tipo != 1 && tipo != 2) {
-                                System.out.println("[Erro] Tipo inválido! Digite somente 1 para Estudante ou 2 para Bibliotecário.");
-                            } else {
-                                System.out.print("ID do Usuário (int): ");
-                                int id = lerIntNaoNegativo(sc, "ID de usuário");
-
-                                System.out.print("Nome: ");
-                                String nome = lerTexto(sc);
-
-                                System.out.print("Email: ");
-                                String email = lerTexto(sc);
-
-                                if (tipo == 1) {
-                                    biblioteca.cadastrarUsuario(new Estudante(id, nome, email));
-                                } else {
-                                    biblioteca.cadastrarUsuario(new Bibliotecario(id, nome, email));
-                                }
-                            }
-                        }
-
-                        case 12 -> {
-                            System.out.println("\n--- ALTERAR QUANTIDADE DE LIVRO ---");
-                            System.out.println("1. Adicionar quantidade");
-                            System.out.println("2. Remover quantidade");
-                            System.out.print("Escolha uma opção: ");
-
-                            int tipoAlteracao = lerInt(sc);
-
-                            if (tipoAlteracao != 1 && tipoAlteracao != 2) {
-                                System.out.println("[Erro] Opção inválida! Digite somente 1 ou 2.");
-                            } else {
-                                System.out.print("Código do Livro: ");
-                                int codigoLivro = lerIntNaoNegativo(sc, "Código do livro");
-
-                                System.out.print("Quantidade: ");
-                                int quantidade = lerIntNaoNegativo(sc, "Quantidade do livro");
-
-                                if (tipoAlteracao == 1) {
-                                    biblioteca.adicionarQuantidadeLivro(codigoLivro, quantidade);
-                                } else {
-                                    biblioteca.removerQuantidadeLivro(codigoLivro, quantidade);
-                                }
-                            }
-                        }
-
-                        case 0 -> {
-                            biblioteca.gravarDados();
-                            opcaoSessao = 0;
-                            System.out.println("Sistema encerrado.");
-                        }
-
-                        default -> System.out.println("Opção inválida!");
-                    }
-
-                } catch (NumberFormatException e) {
-                    System.out.println("[Erro] Entrada inválida.");
-                } catch (IllegalArgumentException e) {
-                    System.out.println("[Erro] " + e.getMessage());
-                } catch (UsuarioNaoEncontradoException | LivroNaoEncontradoException | LivroIndisponivelException e) {
-                    System.out.println("[Erro Negócio] " + e.getMessage());
-                } catch (Exception e) {
-                    System.out.println("[Erro Sistema] " + e.getMessage());
+                return null;
+            }
+            catch (NoSuchMethodException ignored) {
+            }
+            catch (Exception ex) {
+                Throwable causa = ex.getCause();
+                if (causa != null) {
+                    throw new Exception(causa.getMessage());
                 }
-
-            } else if (usuarioLogado instanceof Estudante) {
-                System.out.println("\n===== MENU DISCENTE (ESTUDANTE) =====");
-                System.out.println("1. Buscar Livro por Código");
-                System.out.println("2. Buscar Livro por Autor");
-                System.out.println("3. Listar Meus Livros Emprestados");
-                System.out.println("4. Logout (Trocar de Usuário)");
-                System.out.println("0. Salvar e Sair");
-                System.out.print("Escolha uma opção: ");
-
-                try {
-                    int op = lerInt(sc);
-
-                    switch (op) {
-                        case 1 -> {
-                            System.out.print("Digite o código do livro: ");
-                            int cod = lerIntNaoNegativo(sc, "Código do livro");
-                            System.out.println(biblioteca.buscarLivroPorCodigo(cod));
-                        }
-
-                        case 2 -> {
-                            System.out.print("Digite o autor ou parte dele: ");
-                            String autor = lerTexto(sc);
-                            biblioteca.buscarLivroPorAutor(autor);
-                        }
-
-                        case 3 -> biblioteca.listarLivrosEmprestadosPorUsuario(usuarioLogado.getId());
-
-                        case 4 -> {
-                            usuarioLogado = null;
-                            System.out.println("Logout efetuado.");
-                        }
-
-                        case 0 -> {
-                            biblioteca.gravarDados();
-                            opcaoSessao = 0;
-                            System.out.println("Sistema encerrado.");
-                        }
-
-                        default -> System.out.println("Opção inválida!");
-                    }
-
-                } catch (NumberFormatException e) {
-                    System.out.println("[Erro] Entrada inválida.");
-                } catch (IllegalArgumentException e) {
-                    System.out.println("[Erro] " + e.getMessage());
-                } catch (LivroNaoEncontradoException e) {
-                    System.out.println("[Erro Negócio] " + e.getMessage());
-                } catch (Exception e) {
-                    System.out.println("[Erro Sistema] " + e.getMessage());
-                }
+                throw ex;
             }
         }
 
-        sc.close();
+        return null;
     }
 
-    private static String lerTexto(Scanner sc) {
-        return sc.nextLine().trim();
-    }
+    private Object buscarLivroPorCodigo(int codigo) throws Exception {
+        String[] nomesPossiveis = {
+                "buscarLivroPorCódigo",
+                "buscarLivroPorCodigo",
+                "buscarLivroPorId",
+                "buscarLivro",
+                "getLivroPorCodigo",
+                "procurarLivroPorCodigo"
+        };
 
-    private static int lerInt(Scanner sc) {
-        return Integer.parseInt(lerTexto(sc));
-    }
-
-    private static int lerIntNaoNegativo(Scanner sc, String nomeCampo) {
-        int valor = lerInt(sc);
-
-        if (valor < 0) {
-            throw new IllegalArgumentException(nomeCampo + " não pode ser negativo.");
+        for (String nomeMetodo : nomesPossiveis) {
+            try {
+                Method metodo = biblioteca.getClass().getMethod(nomeMetodo, int.class);
+                return metodo.invoke(biblioteca, codigo);
+            }
+            catch (NoSuchMethodException ignored) {
+            }
+            catch (Exception ex) {
+                Throwable causa = ex.getCause();
+                if (causa != null) {
+                    throw new Exception(causa.getMessage());
+                }
+                throw ex;
+            }
         }
 
-        return valor;
+        return null;
+    }
+
+    private boolean chamarMetodoSemParametro(String... nomesPossiveis) throws Exception {
+        for (String nomeMetodo : nomesPossiveis) {
+            try {
+                Method metodo = biblioteca.getClass().getMethod(nomeMetodo);
+                Object resultado = metodo.invoke(biblioteca);
+
+                if (resultado != null) {
+                    System.out.println(resultado);
+                }
+
+                return true;
+            }
+            catch (NoSuchMethodException ignored) {
+            }
+            catch (Exception ex) {
+                Throwable causa = ex.getCause();
+                if (causa != null) {
+                    throw new Exception(causa.getMessage());
+                }
+                throw ex;
+            }
+        }
+
+        return false;
+    }
+
+    private void limparCampos() {
+        txCodLivro.setText("");
+        txTitulo.setText("");
+        txAutor.setText("");
+        txAno.setText("");
+        txQtd.setText("");
+        txIdUsuario.setText("");
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(Main::new);
     }
 }

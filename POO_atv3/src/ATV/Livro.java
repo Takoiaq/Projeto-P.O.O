@@ -1,6 +1,6 @@
 package ATV;
 
-public class Livro {
+public class Livro implements Interface {
     private int codigo;
     private String titulo;
     private String autor;
@@ -23,7 +23,6 @@ public class Livro {
         this.quantidade = quantidade;
     }
 
-    // Mantém compatibilidade com código antigo que usava true/false
     public Livro(int codigo, String titulo, String autor, int anop, boolean disp) {
         this(codigo, titulo, autor, anop, disp ? 1 : 0);
     }
@@ -92,7 +91,6 @@ public class Livro {
         quantidade++;
     }
 
-    // Mantido só para não quebrar código antigo
     public void setDisp(boolean disp) {
         if (!disp) {
             this.quantidade = 0;
@@ -105,6 +103,7 @@ public class Livro {
         return texto == null ? "" : texto.trim();
     }
 
+    @Override
     public String toCsv() {
         return codigo + ";" + titulo + ";" + autor + ";" + anop + ";" + quantidade;
     }

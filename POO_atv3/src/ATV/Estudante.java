@@ -1,7 +1,7 @@
 package ATV;
 
 public class Estudante extends Usuario {
-    
+
     public Estudante(int id, String nome, String email) {
         super(id, nome, email);
     }
@@ -13,11 +13,14 @@ public class Estudante extends Usuario {
 
     @Override
     public String toCsv() {
-        return "ESTUDANTE;" + id + ";" + nome + ";" + email;
+        return "ESTUDANTE;" + getId() + ";" + getNome() + ";" + getEmail();
     }
 
     @Override
     public String toString() {
-        return "Estudante [ID: " + getId() + " | Nome: " + getNome() + " | Email: " + getEmail() + "]";
+        return "Estudante [ID: " + getId() +
+                " | Nome: " + getNome() +
+                " | Email: " + getEmail() +
+                " | Prazo: " + getPrazoEmprestimo() + " dias]";
     }
 }

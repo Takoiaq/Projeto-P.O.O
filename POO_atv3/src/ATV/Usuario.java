@@ -1,28 +1,53 @@
 package ATV;
 
-public abstract class Usuario implements DadosEntidade {
-    protected int id;
-    protected String nome;
-    protected String email;
+public abstract class Usuario implements Interface {
+    private int id;
+    private String nome;
+    private String email;
 
     public Usuario(int id, String nome, String email) {
         if (id < 0) {
-            throw new IllegalArgumentException("ID de usuário não pode ser negativo.");
+            throw new IllegalArgumentException("ID não pode ser negativo.");
         }
 
         this.id = id;
-        this.nome = normalizarTexto(nome);
+        this.nome = normalizarNome(nome);
         this.email = normalizarEmail(email);
     }
 
-    @Override
+    private String normalizarNome(String nome) {
+        if (nome == null || nome.trim().isBlank()) {
+            throw new IllegalArgumentException("Nome não pode estar vazio.");
+        }
+
+        return nome.trim();
+    }
+
+    private String normalizarEmail(String email) {
+        if (email == null || email.trim().isBlank()) {
+            throw new IllegalArgumentException("Email não pode estar vazio.");
+        }
+
+        email = email.trim();
+
+        if (email.contains(" ")) {
+            throw new IllegalArgumentException("Email não pode conter espaços.");
+        }
+
+        if (!email.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+            throw new IllegalArgumentException("Email inválido. Use um formato válido, exemplo: nome@email.com");
+        }
+
+        return email;
+    }
+
     public int getId() {
         return id;
     }
 
     public void setId(int id) {
         if (id < 0) {
-            throw new IllegalArgumentException("ID de usuário não pode ser negativo.");
+            throw new IllegalArgumentException("ID não pode ser negativo.");
         }
 
         this.id = id;
@@ -33,7 +58,7 @@ public abstract class Usuario implements DadosEntidade {
     }
 
     public void setNome(String nome) {
-        this.nome = normalizarTexto(nome);
+        this.nome = normalizarNome(nome);
     }
 
     public String getEmail() {
@@ -44,40 +69,8 @@ public abstract class Usuario implements DadosEntidade {
         this.email = normalizarEmail(email);
     }
 
-    protected String normalizarTexto(String texto) {
-        return texto == null ? "" : texto.trim();
-    }
-
-    private String normalizarEmail(String email) {
-        String emailTratado = normalizarTexto(email);
-
-        if (!emailValido(emailTratado)) {
-            throw new IllegalArgumentException(
-                    "Email inválido. Use um formato válido, exemplo: nome@email.com"
-            );
-        }
-
-        return emailTratado;
-    }
-
-    private boolean emailValido(String email) {
-        if (email == null || email.isBlank()) {
-            return false;
-        }
-
-        if (email.contains(" ")) {
-            return false;
-        }
-
-        return email.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
-    }
-
     public abstract int getPrazoEmprestimo();
 
-    public abstract String toCsv();
-
     @Override
-    public String toString() {
-        return "ID: " + id + " | Nome: " + nome + " | Email: " + email;
-    }
-}
+    public abstract String toCsv();
+}   

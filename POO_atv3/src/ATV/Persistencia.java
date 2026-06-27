@@ -1,5 +1,7 @@
 package ATV;
 
+import ATV.Exception.ArquivoInvalidoException;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -8,12 +10,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import ATV.Exception.ArquivoInvalidoException;
 
 public class Persistencia {
     private final File arqLivros;
@@ -38,9 +37,9 @@ public class Persistencia {
             verificarDiretorio(arqUsuarios);
             verificarDiretorio(arqEmprestimos);
 
-            salvarLivros(livros);
-            salvarUsuarios(usuarios);
-            salvarEmprestimos(emprestimos);
+            salvarLista(arqLivros, livros);
+            salvarLista(arqUsuarios, usuarios);
+            salvarLista(arqEmprestimos, emprestimos);
 
         } catch (IOException e) {
             throw new ArquivoInvalidoException("Erro ao gravar os arquivos: " + e.getMessage());
@@ -48,21 +47,19 @@ public class Persistencia {
     }
 
     public DadosBiblioteca carregarDados() throws ArquivoInvalidoException {
-    try {
-        List<Livro> livros = carregarLivros();
-        List<Usuario> usuarios = carregarUsuarios();
-        List<Emprestimo> emprestimos = carregarEmprestimos(livros, usuarios);
+        try {
+            List<Livro> livros = carregarLivros();
+            List<Usuario> usuarios = carregarUsuarios();
+            List<Emprestimo> emprestimos = carregarEmprestimos(livros, usuarios);
 
-        return new DadosBiblioteca(livros, usuarios, emprestimos);
+            return new DadosBiblioteca(livros, usuarios, emprestimos);
 
-    } catch (IOException | DateTimeParseException |
-             IndexOutOfBoundsException | IllegalArgumentException e) {
-
-        throw new ArquivoInvalidoException(
-                "Erro ao ler os arquivos. Verifique se os dados estão no formato correto: " + e.getMessage()
-        );
+        } catch (Exception e) {
+            throw new ArquivoInvalidoException(
+                    "Erro ao ler os arquivos. Verifique se os dados estão no formato correto: " + e.getMessage()
+            );
+        }
     }
-}
 
     private void verificarDiretorio(File arquivo) throws IOException {
         File pasta = arquivo.getParentFile();
@@ -72,28 +69,10 @@ public class Persistencia {
         }
     }
 
-    private void salvarLivros(List<Livro> livros) throws IOException {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(arqLivros))) {
-            for (Livro livro : livros) {
-                bw.write(livro.toCsv());
-                bw.newLine();
-            }
-        }
-    }
-
-    private void salvarUsuarios(List<Usuario> usuarios) throws IOException {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(arqUsuarios))) {
-            for (Usuario usuario : usuarios) {
-                bw.write(usuario.toCsv());
-                bw.newLine();
-            }
-        }
-    }
-
-    private void salvarEmprestimos(List<Emprestimo> emprestimos) throws IOException {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(arqEmprestimos))) {
-            for (Emprestimo emprestimo : emprestimos) {
-                bw.write(emprestimo.toCsv());
+    private void salvarLista(File arquivo, List<? extends Interface> lista) throws IOException {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(arquivo))) {
+            for (Interface item : lista) {
+                bw.write(item.toCsv());
                 bw.newLine();
             }
         }
@@ -121,11 +100,11 @@ public class Persistencia {
                 String titulo = tokens[1].trim();
                 String autor = tokens[2].trim();
                 int anoPublicacao = Integer.parseInt(tokens[3].trim());
-                boolean disponivel = parseStringToBool(tokens[4].trim());
+                int quantidade = parseQuantidadeLivro(tokens[4].trim());
 
                 validarCodigoNaoNegativo(codigo, "Código do livro");
 
-                lista.add(new Livro(codigo, titulo, autor, anoPublicacao, disponivel));
+                lista.add(new Livro(codigo, titulo, autor, anoPublicacao, quantidade));
             }
         }
 
@@ -156,14 +135,11 @@ public class Persistencia {
                 String email = tokens[3].trim();
 
                 validarIdNaoNegativo(id, "ID de usuário");
-                validarEmail(email);
 
                 if (tipo.equals("ESTUDANTE")) {
                     lista.add(new Estudante(id, nome, email));
 
                 } else if (tipo.equals("BIBLIOTECARIO") || tipo.equals("PROFESSOR")) {
-                    // Aceita PROFESSOR para não quebrar arquivos antigos,
-                    // mas quando salvar de novo será gravado como BIBLIOTECARIO.
                     lista.add(new Bibliotecario(id, nome, email));
 
                 } else {
@@ -237,38 +213,29 @@ public class Persistencia {
         }
     }
 
-    private void validarEmail(String email) {
-        String emailTratado = email == null ? "" : email.trim();
-
-        if (emailTratado.isBlank()) {
-            throw new IllegalArgumentException("Email não pode estar vazio.");
-        }
-
-        if (emailTratado.contains(" ")) {
-            throw new IllegalArgumentException("Email não pode conter espaços.");
-        }
-
-        boolean emailValido = emailTratado.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
-
-        if (!emailValido) {
-            throw new IllegalArgumentException(
-                    "Email inválido: " + emailTratado + ". Use um formato como nome@email.com"
-            );
-        }
-    }
-
-    private boolean parseStringToBool(String valor) throws ArquivoInvalidoException {
+    private int parseQuantidadeLivro(String valor) throws ArquivoInvalidoException {
         valor = valor.trim();
 
         if ("true".equalsIgnoreCase(valor)) {
-            return true;
+            return 1;
         }
 
         if ("false".equalsIgnoreCase(valor)) {
-            return false;
+            return 0;
         }
 
-        throw new ArquivoInvalidoException("Valor booleano inválido: " + valor);
+        try {
+            int quantidade = Integer.parseInt(valor);
+
+            if (quantidade < 0) {
+                throw new ArquivoInvalidoException("Quantidade do livro não pode ser negativa: " + valor);
+            }
+
+            return quantidade;
+
+        } catch (NumberFormatException e) {
+            throw new ArquivoInvalidoException("Quantidade inválida em livros.txt: " + valor);
+        }
     }
 
     private Livro acharLivro(List<Livro> livros, int codigo) {
