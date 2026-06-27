@@ -193,6 +193,38 @@ public class Biblioteca {
         return false;
     }
 
+    public void realizarDevolucao(int codigoLivro, int idUsuario)
+            throws LivroNaoEncontradoException, UsuarioNaoEncontradoException {
+
+        if (codigoLivro < 0) {
+            throw new LivroNaoEncontradoException("Código do livro não pode ser negativo.");
+        }
+
+        if (idUsuario < 0) {
+            throw new UsuarioNaoEncontradoException("ID de usuário não pode ser negativo.");
+        }
+
+        Livro livro = buscarLivroPorCodigo(codigoLivro);
+        Usuario usuario = buscarUsuarioPorId(idUsuario);
+        Emprestimo emprestimoEncontrado = buscarEmprestimoAtivo(codigoLivro, idUsuario);
+
+        if (emprestimoEncontrado == null) {
+            System.out.println(
+                    "Aviso: o usuário '" + usuario.getNome() +
+                    "' não possui empréstimo ativo do livro '" + livro.getTitulo() + "'."
+            );
+            return;
+        }
+
+        emprestimoEncontrado.getLivro().devolverUnidade();
+        emprestimos.remove(emprestimoEncontrado);
+
+        System.out.println("Devolução realizada com sucesso!");
+        System.out.println("Livro: " + livro.getTitulo());
+        System.out.println("Usuário: " + usuario.getNome());
+        System.out.println("Quantidade atual do livro: " + livro.getQuantidade());
+    }
+
     public void realizarDevolucao(int codigoLivro) throws LivroNaoEncontradoException {
         if (codigoLivro < 0) {
             throw new LivroNaoEncontradoException("Código do livro não pode ser negativo.");
@@ -200,16 +232,23 @@ public class Biblioteca {
 
         Livro livro = buscarLivroPorCodigo(codigoLivro);
         Emprestimo emprestimoEncontrado = null;
+        int quantidadeEmprestimosDoLivro = 0;
 
         for (Emprestimo emprestimo : emprestimos) {
             if (emprestimo.getLivro().getCodigo() == codigoLivro) {
                 emprestimoEncontrado = emprestimo;
-                break;
+                quantidadeEmprestimosDoLivro++;
             }
         }
 
-        if (emprestimoEncontrado == null) {
+        if (quantidadeEmprestimosDoLivro == 0) {
             System.out.println("Aviso: O livro '" + livro.getTitulo() + "' não possui empréstimo ativo no sistema.");
+            return;
+        }
+
+        if (quantidadeEmprestimosDoLivro > 1) {
+            System.out.println("[Erro] Existe mais de um empréstimo ativo deste livro.");
+            System.out.println("Informe também o ID do usuário para realizar a devolução correta.");
             return;
         }
 
@@ -218,6 +257,17 @@ public class Biblioteca {
 
         System.out.println("Devolução do livro '" + livro.getTitulo() + "' realizada com sucesso!");
         System.out.println("Quantidade atual do livro: " + livro.getQuantidade());
+    }
+
+    private Emprestimo buscarEmprestimoAtivo(int codigoLivro, int idUsuario) {
+        for (Emprestimo emprestimo : emprestimos) {
+            if (emprestimo.getLivro().getCodigo() == codigoLivro &&
+                    emprestimo.getUsuario().getId() == idUsuario) {
+                return emprestimo;
+            }
+        }
+
+        return null;
     }
 
     public void listarLivrosCadastrados() {

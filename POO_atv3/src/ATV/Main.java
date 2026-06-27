@@ -153,7 +153,11 @@ public class Main {
                         case 5 -> {
                             System.out.print("Código do Livro para Devolução: ");
                             int codL = lerIntNaoNegativo(sc, "Código do livro");
-                            biblioteca.realizarDevolucao(codL);
+
+                            System.out.print("ID do Usuário que está devolvendo: ");
+                            int idU = lerIntNaoNegativo(sc, "ID de usuário");
+
+                            biblioteca.realizarDevolucao(codL, idU);
                         }
 
                         case 6 -> biblioteca.listarLivrosCadastrados();

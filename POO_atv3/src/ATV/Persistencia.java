@@ -48,21 +48,21 @@ public class Persistencia {
     }
 
     public DadosBiblioteca carregarDados() throws ArquivoInvalidoException {
-    try {
-        List<Livro> livros = carregarLivros();
-        List<Usuario> usuarios = carregarUsuarios();
-        List<Emprestimo> emprestimos = carregarEmprestimos(livros, usuarios);
+        try {
+            List<Livro> livros = carregarLivros();
+            List<Usuario> usuarios = carregarUsuarios();
+            List<Emprestimo> emprestimos = carregarEmprestimos(livros, usuarios);
 
-        return new DadosBiblioteca(livros, usuarios, emprestimos);
+            return new DadosBiblioteca(livros, usuarios, emprestimos);
 
-    } catch (IOException | DateTimeParseException |
-             IndexOutOfBoundsException | IllegalArgumentException e) {
+        } catch (IOException | DateTimeParseException |
+                 IndexOutOfBoundsException | IllegalArgumentException e) {
 
-        throw new ArquivoInvalidoException(
-                "Erro ao ler os arquivos. Verifique se os dados estão no formato correto: " + e.getMessage()
-        );
+            throw new ArquivoInvalidoException(
+                    "Erro ao ler os arquivos. Verifique se os dados estão no formato correto: " + e.getMessage()
+            );
+        }
     }
-}
 
     private void verificarDiretorio(File arquivo) throws IOException {
         File pasta = arquivo.getParentFile();
@@ -121,11 +121,12 @@ public class Persistencia {
                 String titulo = tokens[1].trim();
                 String autor = tokens[2].trim();
                 int anoPublicacao = Integer.parseInt(tokens[3].trim());
-                boolean disponivel = parseStringToBool(tokens[4].trim());
+                int quantidade = parseQuantidadeLivro(tokens[4].trim());
 
                 validarCodigoNaoNegativo(codigo, "Código do livro");
+                validarQuantidadeNaoNegativa(quantidade, "Quantidade do livro");
 
-                lista.add(new Livro(codigo, titulo, autor, anoPublicacao, disponivel));
+                lista.add(new Livro(codigo, titulo, autor, anoPublicacao, quantidade));
             }
         }
 
@@ -162,8 +163,6 @@ public class Persistencia {
                     lista.add(new Estudante(id, nome, email));
 
                 } else if (tipo.equals("BIBLIOTECARIO") || tipo.equals("PROFESSOR")) {
-                    // Aceita PROFESSOR para não quebrar arquivos antigos,
-                    // mas quando salvar de novo será gravado como BIBLIOTECARIO.
                     lista.add(new Bibliotecario(id, nome, email));
 
                 } else {
@@ -237,6 +236,12 @@ public class Persistencia {
         }
     }
 
+    private void validarQuantidadeNaoNegativa(int quantidade, String campo) {
+        if (quantidade < 0) {
+            throw new IllegalArgumentException(campo + " não pode ser negativa.");
+        }
+    }
+
     private void validarEmail(String email) {
         String emailTratado = email == null ? "" : email.trim();
 
@@ -257,18 +262,34 @@ public class Persistencia {
         }
     }
 
-    private boolean parseStringToBool(String valor) throws ArquivoInvalidoException {
-        valor = valor.trim();
+    private int parseQuantidadeLivro(String valor) throws ArquivoInvalidoException {
+        valor = valor == null ? "" : valor.trim();
 
+        /*
+         * Compatibilidade com arquivos antigos:
+         * true  = 1 unidade disponível
+         * false = 0 unidades disponíveis
+         */
         if ("true".equalsIgnoreCase(valor)) {
-            return true;
+            return 1;
         }
 
         if ("false".equalsIgnoreCase(valor)) {
-            return false;
+            return 0;
         }
 
-        throw new ArquivoInvalidoException("Valor booleano inválido: " + valor);
+        try {
+            int quantidade = Integer.parseInt(valor);
+
+            if (quantidade < 0) {
+                throw new ArquivoInvalidoException("Quantidade do livro não pode ser negativa: " + valor);
+            }
+
+            return quantidade;
+
+        } catch (NumberFormatException e) {
+            throw new ArquivoInvalidoException("Quantidade inválida em livros.txt: " + valor);
+        }
     }
 
     private Livro acharLivro(List<Livro> livros, int codigo) {
