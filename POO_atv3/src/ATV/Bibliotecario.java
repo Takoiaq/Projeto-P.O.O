@@ -8,7 +8,7 @@ public class Bibliotecario extends Usuario {
 
     @Override
     public int getPrazoEmprestimo() {
-        return 14;
+        return 35;
     }
 
     @Override

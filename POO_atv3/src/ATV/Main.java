@@ -22,7 +22,10 @@ public class Main extends JFrame implements ActionListener {
 
     private JTextField txLogin, txCodLivro, txTitulo, txAutor, txAno, txQtd, txIdUsuario;
     private JPasswordField txSenha;
-    private JButton btLogin, btSair, btCadastrarLivro, btBuscarLivro, btListarTodos, btEmprestimo, btDevolucao, btLogout;
+
+    private JButton btLogin, btSair;
+    private JButton btCadastrarLivro, btBuscarLivro, btListarTodos, btListarUsuarios;
+    private JButton btEmprestimo, btDevolucao, btLogout;
 
     public Main() {
         try {
@@ -77,6 +80,7 @@ public class Main extends JFrame implements ActionListener {
         painelLogin.add(btSair);
 
         add(painelLogin, BorderLayout.CENTER);
+
         revalidate();
         repaint();
     }
@@ -101,12 +105,23 @@ public class Main extends JFrame implements ActionListener {
         txQtd       = new JTextField();
         txIdUsuario = new JTextField();
 
-        painelSis.add(NTxt("Codigo do Livro:"));               painelSis.add(txCodLivro);
-        painelSis.add(NTxt("Titulo do Livro:"));               painelSis.add(txTitulo);
-        painelSis.add(NTxt("Autor:"));                         painelSis.add(txAutor);
-        painelSis.add(NTxt("Ano de Publicação:"));             painelSis.add(txAno);
-        painelSis.add(NTxt("Quantidade de Livros:"));          painelSis.add(txQtd);
-        painelSis.add(NTxt("ID do Usuário:"));                 painelSis.add(txIdUsuario);
+        painelSis.add(NTxt("Código do Livro:"));
+        painelSis.add(txCodLivro);
+
+        painelSis.add(NTxt("Título do Livro:"));
+        painelSis.add(txTitulo);
+
+        painelSis.add(NTxt("Autor:"));
+        painelSis.add(txAutor);
+
+        painelSis.add(NTxt("Ano de Publicação:"));
+        painelSis.add(txAno);
+
+        painelSis.add(NTxt("Quantidade de Livros:"));
+        painelSis.add(txQtd);
+
+        painelSis.add(NTxt("ID do Usuário:"));
+        painelSis.add(txIdUsuario);
 
         add(painelSis, BorderLayout.NORTH);
 
@@ -124,7 +139,8 @@ public class Main extends JFrame implements ActionListener {
 
         btCadastrarLivro = new JButton("Cadastrar Livro");
         btBuscarLivro    = new JButton("Buscar Livro");
-        btListarTodos    = new JButton("Listar Todos");
+        btListarTodos    = new JButton("Listar Livros");
+        btListarUsuarios = new JButton("Listar Usuários");
         btEmprestimo     = new JButton("Realizar Empréstimo");
         btDevolucao      = new JButton("Realizar Devolução");
         btLogout         = new JButton("Terminar Sessão");
@@ -132,27 +148,33 @@ public class Main extends JFrame implements ActionListener {
         btCadastrarLivro.addActionListener(this);
         btBuscarLivro.addActionListener(this);
         btListarTodos.addActionListener(this);
+        btListarUsuarios.addActionListener(this);
         btEmprestimo.addActionListener(this);
         btDevolucao.addActionListener(this);
         btLogout.addActionListener(this);
 
         if (usuarioLogado instanceof Bibliotecario) {
-            botoes.setLayout(new GridLayout(2, 3, 10, 10));
+            botoes.setLayout(new GridLayout(3, 3, 10, 10));
+
             botoes.add(btBuscarLivro);
             botoes.add(btListarTodos);
+            botoes.add(btListarUsuarios);
             botoes.add(btCadastrarLivro);
             botoes.add(btEmprestimo);
             botoes.add(btDevolucao);
             botoes.add(btLogout);
-        } else {
+        }
+        else {
             txCodLivro.setEditable(true);
             txTitulo.setEditable(true);
             txAutor.setEditable(true);
+
             txAno.setEditable(false);
             txQtd.setEditable(false);
             txIdUsuario.setEditable(false);
 
             botoes.setLayout(new GridLayout(1, 3, 10, 10));
+
             botoes.add(btBuscarLivro);
             botoes.add(btListarTodos);
             botoes.add(btLogout);
@@ -180,6 +202,7 @@ public class Main extends JFrame implements ActionListener {
                 }
             }
         };
+
         System.setOut(new PrintStream(out, true));
         System.setErr(new PrintStream(out, true));
     }
@@ -187,7 +210,13 @@ public class Main extends JFrame implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == btSair) {
-            int resposta = JOptionPane.showConfirmDialog(null, "Irá sair mesmo?", "Sair", JOptionPane.YES_NO_OPTION);
+            int resposta = JOptionPane.showConfirmDialog(
+                    null,
+                    "Irá sair mesmo?",
+                    "Sair",
+                    JOptionPane.YES_NO_OPTION
+            );
+
             if (resposta == JOptionPane.YES_OPTION) {
                 salvarDados();
                 System.exit(0);
@@ -210,6 +239,9 @@ public class Main extends JFrame implements ActionListener {
         else if (e.getSource() == btListarTodos) {
             listarLivros();
         }
+        else if (e.getSource() == btListarUsuarios) {
+            listarUsuarios();
+        }
         else if (e.getSource() == btEmprestimo) {
             realizarEmprestimo();
         }
@@ -223,7 +255,12 @@ public class Main extends JFrame implements ActionListener {
         String senha = new String(txSenha.getPassword()).trim();
 
         if (login.isBlank()) {
-            JOptionPane.showMessageDialog(null, "Digite o login ou o ID do usuário.", "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Digite o login ou o ID do usuário.",
+                    "Erro",
+                    JOptionPane.ERROR_MESSAGE
+            );
             return;
         }
 
@@ -235,50 +272,79 @@ public class Main extends JFrame implements ActionListener {
         }
 
         if (!senha.isBlank()) {
-            JOptionPane.showMessageDialog(null,
+            JOptionPane.showMessageDialog(
+                    null,
                     "Login inválido.\nPara administrador use: admin / admin\nPara usuário comum, informe apenas o ID e deixe a senha vazia.",
-                    "Erro de Login", JOptionPane.ERROR_MESSAGE);
+                    "Erro de Login",
+                    JOptionPane.ERROR_MESSAGE
+            );
             return;
         }
 
         try {
             int idUsuario = Integer.parseInt(login);
             Usuario usuario = biblioteca.buscarUsuarioPorId(idUsuario);
+
             usuarioLogado = usuario;
             TelaSistema();
+
             System.out.println("Login realizado com sucesso: " + usuarioLogado);
         }
         catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(null,
+            JOptionPane.showMessageDialog(
+                    null,
                     "Login inválido. Use admin/admin ou digite um ID numérico de usuário.",
-                    "Erro de Login", JOptionPane.ERROR_MESSAGE);
+                    "Erro de Login",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
         catch (Exception ex) {
-            JOptionPane.showMessageDialog(null,
+            JOptionPane.showMessageDialog(
+                    null,
                     "Erro ao fazer login: " + ex.getMessage(),
-                    "Erro de Login", JOptionPane.ERROR_MESSAGE);
+                    "Erro de Login",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
     }
 
     private void cadastrarLivro() {
         Console.setText("");
+
         try {
-            int codigo    = Integer.parseInt(txCodLivro.getText().trim());
+            int codigo = Integer.parseInt(txCodLivro.getText().trim());
             String titulo = txTitulo.getText().trim();
-            String autor  = txAutor.getText().trim();
-            int ano       = Integer.parseInt(txAno.getText().trim());
-            int qtd       = Integer.parseInt(txQtd.getText().trim());
+            String autor = txAutor.getText().trim();
+            int ano = Integer.parseInt(txAno.getText().trim());
+            int qtd = Integer.parseInt(txQtd.getText().trim());
 
             Livro livro = new Livro(codigo, titulo, autor, ano, qtd);
             biblioteca.cadastrarLivro(livro);
-            JOptionPane.showMessageDialog(null, "Livro registrado com sucesso", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Livro registrado com sucesso",
+                    "Sucesso",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
             limparCampos();
         }
         catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(null, "Inválido! Preencha Codigo, Ano e Quantidade com números inteiros.", "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Inválido! Preencha Código, Ano e Quantidade com números inteiros.",
+                    "Erro",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
         catch (IllegalArgumentException ex) {
-            JOptionPane.showMessageDialog(null, ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    null,
+                    ex.getMessage(),
+                    "Erro",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
     }
 
@@ -290,9 +356,12 @@ public class Main extends JFrame implements ActionListener {
         String autorTexto  = txAutor.getText().trim();
 
         if (codigoTexto.isBlank() && tituloTexto.isBlank() && autorTexto.isBlank()) {
-            JOptionPane.showMessageDialog(null,
-                    "Preencha pelo menos um campo para buscar: Codigo, Titulo ou Autor.",
-                    "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Preencha pelo menos um campo para buscar: Código, Título ou Autor.",
+                    "Erro",
+                    JOptionPane.ERROR_MESSAGE
+            );
             return;
         }
 
@@ -301,12 +370,12 @@ public class Main extends JFrame implements ActionListener {
                 int codLivro = Integer.parseInt(codigoTexto);
                 Livro livro = biblioteca.buscarLivroPorCodigo(codLivro);
 
-                System.out.println("=== Resultado por codigo ===");
+                System.out.println("=== Resultado por código ===");
                 System.out.println(livro);
             }
 
             if (!tituloTexto.isBlank()) {
-                System.out.println("=== Resultado por titulo ===");
+                System.out.println("=== Resultado por título ===");
                 biblioteca.buscarLivroPorTitulo(tituloTexto);
             }
 
@@ -318,19 +387,28 @@ public class Main extends JFrame implements ActionListener {
             limparCamposBusca();
         }
         catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(null,
-                    "O codigo do livro precisa ser um número inteiro.",
-                    "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    null,
+                    "O código do livro precisa ser um número inteiro.",
+                    "Erro",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
         catch (LivroNaoEncontradoException ex) {
-            JOptionPane.showMessageDialog(null,
+            JOptionPane.showMessageDialog(
+                    null,
                     ex.getMessage(),
-                    "Livro não encontrado", JOptionPane.ERROR_MESSAGE);
+                    "Livro não encontrado",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
         catch (Exception ex) {
-            JOptionPane.showMessageDialog(null,
+            JOptionPane.showMessageDialog(
+                    null,
                     ex.getMessage(),
-                    "Erro", JOptionPane.ERROR_MESSAGE);
+                    "Erro",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
     }
 
@@ -339,46 +417,94 @@ public class Main extends JFrame implements ActionListener {
         biblioteca.listarLivrosCadastrados();
     }
 
+    private void listarUsuarios() {
+        Console.setText("");
+
+        try {
+            biblioteca.listarUsuariosCadastrados();
+        }
+        catch (Exception ex) {
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Erro ao listar usuários: " + ex.getMessage(),
+                    "Erro",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
+
     private void realizarEmprestimo() {
         try {
-            int codLivro   = Integer.parseInt(txCodLivro.getText().trim());
-            int idUsuario  = Integer.parseInt(txIdUsuario.getText().trim());
+            int codLivro = Integer.parseInt(txCodLivro.getText().trim());
+            int idUsuario = Integer.parseInt(txIdUsuario.getText().trim());
 
             biblioteca.realizarEmprestimo(codLivro, idUsuario);
-            JOptionPane.showMessageDialog(null, "Empréstimo realizado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Empréstimo realizado com sucesso!",
+                    "Sucesso",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
             limparCampos();
         }
         catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(null, "Preencha os campos 'Codigo' e 'ID Usuário' com números.", "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Preencha os campos 'Código' e 'ID Usuário' com números.",
+                    "Erro",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
         catch (LivroIndisponivelException | LivroNaoEncontradoException | UsuarioNaoEncontradoException ex) {
-            JOptionPane.showMessageDialog(null, ex.getMessage(), "Erro de Regra de Negócio", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    null,
+                    ex.getMessage(),
+                    "Erro de Regra de Negócio",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
         catch (Exception ex) {
-            JOptionPane.showMessageDialog(null, ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    null,
+                    ex.getMessage(),
+                    "Erro",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
     }
 
     private void realizarDevolucao() {
         try {
             int codLivro = Integer.parseInt(txCodLivro.getText().trim());
-            String idTexto = txIdUsuario.getText().trim();
 
-            if (idTexto.isBlank()) {
-                biblioteca.realizarDevolucao(codLivro);
-            } else {
-                int idUsuario = Integer.parseInt(idTexto);
-                biblioteca.realizarDevolucao(codLivro, idUsuario);
-            }
+            biblioteca.realizarDevolucao(codLivro);
 
-            JOptionPane.showMessageDialog(null, "Devolução registrada com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Devolução registrada com sucesso!",
+                    "Sucesso",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
             limparCampos();
         }
         catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(null, "Preencha o Codigo do Livro e, se necessário, o ID do Usuário com números.", "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Preencha o Código do Livro com número.",
+                    "Erro",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
         catch (Exception ex) {
-            JOptionPane.showMessageDialog(null, ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    null,
+                    ex.getMessage(),
+                    "Erro",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
     }
 
@@ -387,9 +513,12 @@ public class Main extends JFrame implements ActionListener {
             biblioteca.gravarDados();
         }
         catch (Exception ex) {
-            JOptionPane.showMessageDialog(null,
+            JOptionPane.showMessageDialog(
+                    null,
                     "Não foi possível salvar os dados: " + ex.getMessage(),
-                    "Erro ao Salvar", JOptionPane.ERROR_MESSAGE);
+                    "Erro ao Salvar",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
     }
 

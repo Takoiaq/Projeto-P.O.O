@@ -168,6 +168,19 @@ public class Biblioteca {
         }
     }
 
+    public void listarUsuariosCadastrados() {
+        if (usuarios.isEmpty()) {
+            System.out.println("Nenhum usuário cadastrado.");
+            return;
+        }
+
+        System.out.println("=== USUÁRIOS CADASTRADOS ===");
+
+        for (Usuario usuario : usuarios) {
+            System.out.println(usuario);
+        }
+    }
+
     public void listarTodos() {
         listarLivrosCadastrados();
     }
