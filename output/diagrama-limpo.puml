@@ -1,0 +1,175 @@
+@startuml diagrama-limpo
+skinparam classAttributeIconSize 0
+hide circle
+
+interface Interface {
+  +toCsv(): String
+}
+
+abstract class Usuario {
+  -id: int
+  -nome: String
+  -email: String
+  --
+  +Usuario(id: int, nome: String, email: String)
+  +getId(): int
+  +setId(id: int): void
+  +getNome(): String
+  +setNome(nome: String): void
+  +getEmail(): String
+  +setEmail(email: String): void
+  +getPrazoEmprestimo(): int
+  +getTipo(): String
+  +toCsv(): String
+  +toString(): String
+}
+
+class Estudante {
+  +Estudante(id: int, nome: String, email: String)
+  +getPrazoEmprestimo(): int
+  +getTipo(): String
+  +toCsv(): String
+  +toString(): String
+}
+
+class Bibliotecario {
+  +Bibliotecario(id: int, nome: String, email: String)
+  +getPrazoEmprestimo(): int
+  +getTipo(): String
+  +toCsv(): String
+  +toString(): String
+}
+
+class Livro {
+  -codigo: int
+  -titulo: String
+  -autor: String
+  -anop: int
+  -quantidade: int
+  --
+  +Livro(codigo: int, titulo: String, autor: String, anop: int, quantidade: int)
+  +Livro(codigo: int, titulo: String, autor: String, anop: int, disp: boolean)
+  +getCodigo(): int
+  +setCodigo(codigo: int): void
+  +getTitulo(): String
+  +setTitulo(titulo: String): void
+  +getAutor(): String
+  +setAutor(autor: String): void
+  +getAnop(): int
+  +setAnop(anop: int): void
+  +getQuantidade(): int
+  +setQuantidade(quantidade: int): void
+  +isDisp(): boolean
+  +emprestarUnidade(): void
+  +devolverUnidade(): void
+  +setDisp(disp: boolean): void
+  +toCsv(): String
+  +toString(): String
+}
+
+class Emprestimo {
+  -livro: Livro
+  -usuario: Usuario
+  -dataEmprestimo: LocalDate
+  -dataPrevistaDevolucao: LocalDate
+  --
+  +Emprestimo(livro: Livro, usuario: Usuario)
+  +Emprestimo(livro: Livro, usuario: Usuario, dataEmprestimo: LocalDate, dataPrevistaDevolucao: LocalDate)
+  +getLivro(): Livro
+  +getUsuario(): Usuario
+  +getDataEmprestimo(): LocalDate
+  +getDataPrevistaDevolucao(): LocalDate
+  +toCsv(): String
+  +toString(): String
+}
+
+class Biblioteca {
+  -livros: List<Livro>
+  -usuarios: List<Usuario>
+  -emprestimos: List<Emprestimo>
+  -persistencia: Persistencia
+  --
+  +Biblioteca()
+  +Biblioteca(persistencia: Persistencia)
+  +cadastrarLivro(livro: Livro): void
+  +cadastrarUsuario(usuario: Usuario): void
+  +buscarLivroPorCodigo(codigo: int): Livro
+  +buscarUsuarioPorId(id: int): Usuario
+  +buscarLivroPorTitulo(titulo: String): void
+  +buscarLivroPorAutor(autor: String): void
+  +listarLivrosCadastrados(): void
+  +listarUsuariosCadastrados(): void
+  +realizarEmprestimo(codigoLivro: int, idUsuario: int): void
+  +realizarDevolucao(codigoLivro: int): void
+  +realizarDevolucao(codigoLivro: int, idUsuario: int): void
+  +adicionarQuantidadeLivro(codigoLivro: int, quantidade: int): void
+  +removerQuantidadeLivro(codigoLivro: int, quantidade: int): void
+  +carregarDados(): void
+  +gravarDados(): void
+}
+
+class Persistencia {
+  -arqLivros: File
+  -arqUsuarios: File
+  -arqEmprestimos: File
+  --
+  +Persistencia()
+  +Persistencia(arqLivros: String, arqUsuarios: String, arqEmprestimos: String)
+  +gravarDados(livros: List<Livro>, usuarios: List<Usuario>, emprestimos: List<Emprestimo>): void
+  +carregarDados(): DadosBiblioteca
+}
+
+class DadosBiblioteca {
+  -livros: List<Livro>
+  -usuarios: List<Usuario>
+  -emprestimos: List<Emprestimo>
+  --
+  +DadosBiblioteca(livros: List<Livro>, usuarios: List<Usuario>, emprestimos: List<Emprestimo>)
+  +getLivros(): List<Livro>
+  +getUsuarios(): List<Usuario>
+  +getEmprestimos(): List<Emprestimo>
+}
+
+class Main {
+  -biblioteca: Biblioteca
+  -usuarioLogado: Usuario
+  --
+  +Main()
+  +actionPerformed(e: ActionEvent): void
+  +main(args: String[]): void
+}
+
+class ArquivoInvalidoException
+class LivroIndisponivelException
+class LivroNaoEncontradoException
+class UsuarioNaoEncontradoException
+
+Usuario ..|> Interface
+Livro ..|> Interface
+Emprestimo ..|> Interface
+
+Estudante --|> Usuario
+Bibliotecario --|> Usuario
+
+Biblioteca o-- Livro
+Biblioteca o-- Usuario
+Biblioteca o-- Emprestimo
+Biblioteca *-- Persistencia
+
+Emprestimo *-- Livro
+Emprestimo *-- Usuario
+
+Persistencia ..> DadosBiblioteca
+DadosBiblioteca o-- Livro
+DadosBiblioteca o-- Usuario
+DadosBiblioteca o-- Emprestimo
+
+Main *-- Biblioteca
+Main --> Usuario
+
+ArquivoInvalidoException --|> Exception
+LivroIndisponivelException --|> Exception
+LivroNaoEncontradoException --|> Exception
+UsuarioNaoEncontradoException --|> Exception
+
+@enduml
