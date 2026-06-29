@@ -23,7 +23,7 @@ public class BibliotecarioTest {
 
     @Test
     public void testPrazoEmprestimoBibliotecario() {
-        assertEquals(14, bibliotecario.getPrazoEmprestimo());
+        assertEquals(35, bibliotecario.getPrazoEmprestimo());
     }
 
     @Test

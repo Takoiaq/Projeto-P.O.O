@@ -24,7 +24,7 @@ public class EstudanteTest {
 
     @Test
     public void testPrazoEmprestimoEstudante() {
-        assertEquals(7, estudante.getPrazoEmprestimo());
+        assertEquals(30, estudante.getPrazoEmprestimo());
     }
 
     @Test

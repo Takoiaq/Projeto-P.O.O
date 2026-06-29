@@ -20,11 +20,11 @@ public class Main extends JFrame implements ActionListener {
 
     private JTextArea Console;
 
-    private JTextField txLogin, txCodLivro, txTitulo, txAutor, txAno, txQtd, txIdUsuario;
+    private JTextField txLogin;
     private JPasswordField txSenha;
 
     private JButton btLogin, btSair;
-    private JButton btCadastrarLivro, btBuscarLivro, btListarTodos, btListarUsuarios;
+    private JButton btCadastrarLivro, btCadastrarUsuario, btBuscarLivro, btListarTodos, btListarUsuarios;
     private JButton btEmprestimo, btDevolucao, btLogout;
 
     public Main() {
@@ -41,7 +41,7 @@ public class Main extends JFrame implements ActionListener {
         }
 
         setTitle("Sistema de Gestão de Biblioteca");
-        setSize(800, 600);
+        setSize(850, 600);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -89,41 +89,26 @@ public class Main extends JFrame implements ActionListener {
         getContentPane().removeAll();
         setLayout(new BorderLayout());
 
-        JPanel painelSis = new JPanel();
-        painelSis.setLayout(new GridLayout(6, 2, 10, 10));
-        painelSis.setBackground(Color.WHITE);
+        JPanel painelTopo = new JPanel(new BorderLayout());
+        painelTopo.setBackground(Color.WHITE);
 
         TitledBorder border = BorderFactory.createTitledBorder("Sistema de Biblioteca");
         border.setTitleFont(new Font("Arial", Font.BOLD, 16));
-        border.setTitleColor(Color.LIGHT_GRAY);
-        painelSis.setBorder(border);
+        border.setTitleColor(Color.GRAY);
+        painelTopo.setBorder(border);
 
-        txCodLivro  = new JTextField();
-        txTitulo    = new JTextField();
-        txAutor     = new JTextField();
-        txAno       = new JTextField();
-        txQtd       = new JTextField();
-        txIdUsuario = new JTextField();
+        JLabel lblUsuario = new JLabel("Usuário logado: " + usuarioLogado.getNome());
+        lblUsuario.setFont(new Font("Arial", Font.BOLD, 15));
+        lblUsuario.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
 
-        painelSis.add(NTxt("Código do Livro:"));
-        painelSis.add(txCodLivro);
+        JLabel lblInfo = new JLabel("Escolha uma opção abaixo para abrir a tela da função.");
+        lblInfo.setFont(new Font("Arial", Font.PLAIN, 14));
+        lblInfo.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
 
-        painelSis.add(NTxt("Título do Livro:"));
-        painelSis.add(txTitulo);
+        painelTopo.add(lblUsuario, BorderLayout.NORTH);
+        painelTopo.add(lblInfo, BorderLayout.CENTER);
 
-        painelSis.add(NTxt("Autor:"));
-        painelSis.add(txAutor);
-
-        painelSis.add(NTxt("Ano de Publicação:"));
-        painelSis.add(txAno);
-
-        painelSis.add(NTxt("Quantidade de Livros:"));
-        painelSis.add(txQtd);
-
-        painelSis.add(NTxt("ID do Usuário:"));
-        painelSis.add(txIdUsuario);
-
-        add(painelSis, BorderLayout.NORTH);
+        add(painelTopo, BorderLayout.NORTH);
 
         Console = new JTextArea();
         Console.setEditable(false);
@@ -137,15 +122,17 @@ public class Main extends JFrame implements ActionListener {
         JPanel botoes = new JPanel();
         botoes.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        btCadastrarLivro = new JButton("Cadastrar Livro");
-        btBuscarLivro    = new JButton("Buscar Livro");
-        btListarTodos    = new JButton("Listar Livros");
-        btListarUsuarios = new JButton("Listar Usuários");
-        btEmprestimo     = new JButton("Realizar Empréstimo");
-        btDevolucao      = new JButton("Realizar Devolução");
-        btLogout         = new JButton("Terminar Sessão");
+        btCadastrarLivro   = new JButton("Cadastrar Livro");
+        btCadastrarUsuario = new JButton("Cadastrar Usuário");
+        btBuscarLivro      = new JButton("Buscar Livro");
+        btListarTodos      = new JButton("Listar Livros");
+        btListarUsuarios   = new JButton("Listar Usuários");
+        btEmprestimo       = new JButton("Realizar Empréstimo");
+        btDevolucao        = new JButton("Realizar Devolução");
+        btLogout           = new JButton("Terminar Sessão");
 
         btCadastrarLivro.addActionListener(this);
+        btCadastrarUsuario.addActionListener(this);
         btBuscarLivro.addActionListener(this);
         btListarTodos.addActionListener(this);
         btListarUsuarios.addActionListener(this);
@@ -156,23 +143,16 @@ public class Main extends JFrame implements ActionListener {
         if (usuarioLogado instanceof Bibliotecario) {
             botoes.setLayout(new GridLayout(3, 3, 10, 10));
 
+            botoes.add(btCadastrarLivro);
+            botoes.add(btCadastrarUsuario);
             botoes.add(btBuscarLivro);
             botoes.add(btListarTodos);
             botoes.add(btListarUsuarios);
-            botoes.add(btCadastrarLivro);
             botoes.add(btEmprestimo);
             botoes.add(btDevolucao);
             botoes.add(btLogout);
         }
         else {
-            txCodLivro.setEditable(true);
-            txTitulo.setEditable(true);
-            txAutor.setEditable(true);
-
-            txAno.setEditable(false);
-            txQtd.setEditable(false);
-            txIdUsuario.setEditable(false);
-
             botoes.setLayout(new GridLayout(1, 3, 10, 10));
 
             botoes.add(btBuscarLivro);
@@ -184,12 +164,6 @@ public class Main extends JFrame implements ActionListener {
 
         revalidate();
         repaint();
-    }
-
-    private JLabel NTxt(String texto) {
-        JLabel label = new JLabel(texto);
-        label.setFont(new Font("Arial", Font.BOLD, 14));
-        return label;
     }
 
     private void redirecionarConsole() {
@@ -211,7 +185,7 @@ public class Main extends JFrame implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == btSair) {
             int resposta = JOptionPane.showConfirmDialog(
-                    null,
+                    this,
                     "Irá sair mesmo?",
                     "Sair",
                     JOptionPane.YES_NO_OPTION
@@ -232,6 +206,9 @@ public class Main extends JFrame implements ActionListener {
         }
         else if (e.getSource() == btCadastrarLivro) {
             cadastrarLivro();
+        }
+        else if (e.getSource() == btCadastrarUsuario) {
+            cadastrarUsuario();
         }
         else if (e.getSource() == btBuscarLivro) {
             buscarLivro();
@@ -256,7 +233,7 @@ public class Main extends JFrame implements ActionListener {
 
         if (login.isBlank()) {
             JOptionPane.showMessageDialog(
-                    null,
+                    this,
                     "Digite o login ou o ID do usuário.",
                     "Erro",
                     JOptionPane.ERROR_MESSAGE
@@ -273,7 +250,7 @@ public class Main extends JFrame implements ActionListener {
 
         if (!senha.isBlank()) {
             JOptionPane.showMessageDialog(
-                    null,
+                    this,
                     "Login inválido.\nPara administrador use: admin / admin\nPara usuário comum, informe apenas o ID e deixe a senha vazia.",
                     "Erro de Login",
                     JOptionPane.ERROR_MESSAGE
@@ -292,7 +269,7 @@ public class Main extends JFrame implements ActionListener {
         }
         catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(
-                    null,
+                    this,
                     "Login inválido. Use admin/admin ou digite um ID numérico de usuário.",
                     "Erro de Login",
                     JOptionPane.ERROR_MESSAGE
@@ -300,7 +277,7 @@ public class Main extends JFrame implements ActionListener {
         }
         catch (Exception ex) {
             JOptionPane.showMessageDialog(
-                    null,
+                    this,
                     "Erro ao fazer login: " + ex.getMessage(),
                     "Erro de Login",
                     JOptionPane.ERROR_MESSAGE
@@ -311,37 +288,193 @@ public class Main extends JFrame implements ActionListener {
     private void cadastrarLivro() {
         Console.setText("");
 
+        JTextField campoCodigo = new JTextField();
+        JTextField campoTitulo = new JTextField();
+        JTextField campoAutor = new JTextField();
+        JTextField campoAno = new JTextField();
+        JTextField campoQuantidade = new JTextField();
+
+        JPanel painel = new JPanel(new GridLayout(5, 2, 10, 10));
+
+        painel.add(new JLabel("Código do Livro:"));
+        painel.add(campoCodigo);
+
+        painel.add(new JLabel("Título:"));
+        painel.add(campoTitulo);
+
+        painel.add(new JLabel("Autor:"));
+        painel.add(campoAutor);
+
+        painel.add(new JLabel("Ano de Publicação:"));
+        painel.add(campoAno);
+
+        painel.add(new JLabel("Quantidade:"));
+        painel.add(campoQuantidade);
+
+        int resposta = JOptionPane.showConfirmDialog(
+                this,
+                painel,
+                "Cadastrar Livro",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE
+        );
+
+        if (resposta != JOptionPane.OK_OPTION) {
+            return;
+        }
+
         try {
-            int codigo = Integer.parseInt(txCodLivro.getText().trim());
-            String titulo = txTitulo.getText().trim();
-            String autor = txAutor.getText().trim();
-            int ano = Integer.parseInt(txAno.getText().trim());
-            int qtd = Integer.parseInt(txQtd.getText().trim());
+            int codigo = Integer.parseInt(campoCodigo.getText().trim());
+            String titulo = campoTitulo.getText().trim();
+            String autor = campoAutor.getText().trim();
+            int ano = Integer.parseInt(campoAno.getText().trim());
+            int qtd = Integer.parseInt(campoQuantidade.getText().trim());
+
+            if (titulo.isBlank() || autor.isBlank()) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Preencha o título e o autor do livro.",
+                        "Erro",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                return;
+            }
 
             Livro livro = new Livro(codigo, titulo, autor, ano, qtd);
             biblioteca.cadastrarLivro(livro);
+            salvarDados();
 
             JOptionPane.showMessageDialog(
-                    null,
-                    "Livro registrado com sucesso",
+                    this,
+                    "Livro cadastrado com sucesso!",
                     "Sucesso",
                     JOptionPane.INFORMATION_MESSAGE
             );
 
-            limparCampos();
+            System.out.println("=== Livro cadastrado ===");
+            System.out.println(livro);
         }
         catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(
-                    null,
-                    "Inválido! Preencha Código, Ano e Quantidade com números inteiros.",
+                    this,
+                    "Código, ano e quantidade precisam ser números inteiros.",
                     "Erro",
                     JOptionPane.ERROR_MESSAGE
             );
         }
         catch (IllegalArgumentException ex) {
             JOptionPane.showMessageDialog(
-                    null,
+                    this,
                     ex.getMessage(),
+                    "Erro",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
+        catch (Exception ex) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Erro ao cadastrar livro: " + ex.getMessage(),
+                    "Erro",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
+
+    private void cadastrarUsuario() {
+        Console.setText("");
+
+        JTextField campoId = new JTextField();
+        JTextField campoNome = new JTextField();
+        JTextField campoEmail = new JTextField();
+
+        JComboBox<String> campoTipo = new JComboBox<>(new String[] {
+                "ESTUDANTE",
+                "BIBLIOTECARIO"
+        });
+
+        JPanel painel = new JPanel(new GridLayout(4, 2, 10, 10));
+
+        painel.add(new JLabel("ID do Usuário:"));
+        painel.add(campoId);
+
+        painel.add(new JLabel("Nome:"));
+        painel.add(campoNome);
+
+        painel.add(new JLabel("Email:"));
+        painel.add(campoEmail);
+
+        painel.add(new JLabel("Tipo:"));
+        painel.add(campoTipo);
+
+        int resposta = JOptionPane.showConfirmDialog(
+                this,
+                painel,
+                "Cadastrar Usuário",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE
+        );
+
+        if (resposta != JOptionPane.OK_OPTION) {
+            return;
+        }
+
+        try {
+            int id = Integer.parseInt(campoId.getText().trim());
+            String nome = campoNome.getText().trim();
+            String email = campoEmail.getText().trim();
+            String tipo = (String) campoTipo.getSelectedItem();
+
+            if (nome.isBlank() || email.isBlank()) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Preencha nome e email do usuário.",
+                        "Erro",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                return;
+            }
+
+            Usuario usuario;
+
+            if ("BIBLIOTECARIO".equals(tipo)) {
+                usuario = new Bibliotecario(id, nome, email);
+            } else {
+                usuario = new Estudante(id, nome, email);
+            }
+
+            biblioteca.cadastrarUsuario(usuario);
+            salvarDados();
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Usuário cadastrado com sucesso!",
+                    "Sucesso",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
+            System.out.println("=== Usuário cadastrado ===");
+            System.out.println(usuario);
+        }
+        catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "O ID do usuário precisa ser um número inteiro.",
+                    "Erro",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
+        catch (IllegalArgumentException ex) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    ex.getMessage(),
+                    "Erro",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
+        catch (Exception ex) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Erro ao cadastrar usuário: " + ex.getMessage(),
                     "Erro",
                     JOptionPane.ERROR_MESSAGE
             );
@@ -351,13 +484,40 @@ public class Main extends JFrame implements ActionListener {
     private void buscarLivro() {
         Console.setText("");
 
-        String codigoTexto = txCodLivro.getText().trim();
-        String tituloTexto = txTitulo.getText().trim();
-        String autorTexto  = txAutor.getText().trim();
+        JTextField campoCodigo = new JTextField();
+        JTextField campoTitulo = new JTextField();
+        JTextField campoAutor = new JTextField();
+
+        JPanel painel = new JPanel(new GridLayout(3, 2, 10, 10));
+
+        painel.add(new JLabel("Código do Livro:"));
+        painel.add(campoCodigo);
+
+        painel.add(new JLabel("Título do Livro:"));
+        painel.add(campoTitulo);
+
+        painel.add(new JLabel("Autor do Livro:"));
+        painel.add(campoAutor);
+
+        int resposta = JOptionPane.showConfirmDialog(
+                this,
+                painel,
+                "Buscar Livro",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE
+        );
+
+        if (resposta != JOptionPane.OK_OPTION) {
+            return;
+        }
+
+        String codigoTexto = campoCodigo.getText().trim();
+        String tituloTexto = campoTitulo.getText().trim();
+        String autorTexto  = campoAutor.getText().trim();
 
         if (codigoTexto.isBlank() && tituloTexto.isBlank() && autorTexto.isBlank()) {
             JOptionPane.showMessageDialog(
-                    null,
+                    this,
                     "Preencha pelo menos um campo para buscar: Código, Título ou Autor.",
                     "Erro",
                     JOptionPane.ERROR_MESSAGE
@@ -383,12 +543,10 @@ public class Main extends JFrame implements ActionListener {
                 System.out.println("=== Resultado por autor ===");
                 biblioteca.buscarLivroPorAutor(autorTexto);
             }
-
-            limparCamposBusca();
         }
         catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(
-                    null,
+                    this,
                     "O código do livro precisa ser um número inteiro.",
                     "Erro",
                     JOptionPane.ERROR_MESSAGE
@@ -396,7 +554,7 @@ public class Main extends JFrame implements ActionListener {
         }
         catch (LivroNaoEncontradoException ex) {
             JOptionPane.showMessageDialog(
-                    null,
+                    this,
                     ex.getMessage(),
                     "Livro não encontrado",
                     JOptionPane.ERROR_MESSAGE
@@ -404,7 +562,7 @@ public class Main extends JFrame implements ActionListener {
         }
         catch (Exception ex) {
             JOptionPane.showMessageDialog(
-                    null,
+                    this,
                     ex.getMessage(),
                     "Erro",
                     JOptionPane.ERROR_MESSAGE
@@ -425,7 +583,7 @@ public class Main extends JFrame implements ActionListener {
         }
         catch (Exception ex) {
             JOptionPane.showMessageDialog(
-                    null,
+                    this,
                     "Erro ao listar usuários: " + ex.getMessage(),
                     "Erro",
                     JOptionPane.ERROR_MESSAGE
@@ -434,32 +592,60 @@ public class Main extends JFrame implements ActionListener {
     }
 
     private void realizarEmprestimo() {
+        Console.setText("");
+
+        JTextField campoCodLivro = new JTextField();
+        JTextField campoIdUsuario = new JTextField();
+
+        JPanel painel = new JPanel(new GridLayout(2, 2, 10, 10));
+
+        painel.add(new JLabel("Código do Livro:"));
+        painel.add(campoCodLivro);
+
+        painel.add(new JLabel("ID do Usuário:"));
+        painel.add(campoIdUsuario);
+
+        int resposta = JOptionPane.showConfirmDialog(
+                this,
+                painel,
+                "Realizar Empréstimo",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE
+        );
+
+        if (resposta != JOptionPane.OK_OPTION) {
+            return;
+        }
+
         try {
-            int codLivro = Integer.parseInt(txCodLivro.getText().trim());
-            int idUsuario = Integer.parseInt(txIdUsuario.getText().trim());
+            int codLivro = Integer.parseInt(campoCodLivro.getText().trim());
+            int idUsuario = Integer.parseInt(campoIdUsuario.getText().trim());
 
             biblioteca.realizarEmprestimo(codLivro, idUsuario);
+            salvarDados();
 
             JOptionPane.showMessageDialog(
-                    null,
+                    this,
                     "Empréstimo realizado com sucesso!",
                     "Sucesso",
                     JOptionPane.INFORMATION_MESSAGE
             );
 
-            limparCampos();
+            System.out.println("=== Empréstimo realizado ===");
+            System.out.println("Código do livro: " + codLivro);
+            System.out.println("ID do usuário: " + idUsuario);
         }
         catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(
-                    null,
-                    "Preencha os campos 'Código' e 'ID Usuário' com números.",
+                    this,
+                    "Código do livro e ID do usuário precisam ser números.",
                     "Erro",
                     JOptionPane.ERROR_MESSAGE
             );
         }
         catch (LivroIndisponivelException | LivroNaoEncontradoException | UsuarioNaoEncontradoException ex) {
             JOptionPane.showMessageDialog(
-                    null,
+                    this,
                     ex.getMessage(),
                     "Erro de Regra de Negócio",
                     JOptionPane.ERROR_MESSAGE
@@ -467,7 +653,7 @@ public class Main extends JFrame implements ActionListener {
         }
         catch (Exception ex) {
             JOptionPane.showMessageDialog(
-                    null,
+                    this,
                     ex.getMessage(),
                     "Erro",
                     JOptionPane.ERROR_MESSAGE
@@ -476,31 +662,54 @@ public class Main extends JFrame implements ActionListener {
     }
 
     private void realizarDevolucao() {
+        Console.setText("");
+
+        JTextField campoCodLivro = new JTextField();
+
+        JPanel painel = new JPanel(new GridLayout(1, 2, 10, 10));
+
+        painel.add(new JLabel("Código do Livro:"));
+        painel.add(campoCodLivro);
+
+        int resposta = JOptionPane.showConfirmDialog(
+                this,
+                painel,
+                "Realizar Devolução",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE
+        );
+
+        if (resposta != JOptionPane.OK_OPTION) {
+            return;
+        }
+
         try {
-            int codLivro = Integer.parseInt(txCodLivro.getText().trim());
+            int codLivro = Integer.parseInt(campoCodLivro.getText().trim());
 
             biblioteca.realizarDevolucao(codLivro);
+            salvarDados();
 
             JOptionPane.showMessageDialog(
-                    null,
+                    this,
                     "Devolução registrada com sucesso!",
                     "Sucesso",
                     JOptionPane.INFORMATION_MESSAGE
             );
 
-            limparCampos();
+            System.out.println("=== Devolução realizada ===");
+            System.out.println("Código do livro: " + codLivro);
         }
         catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(
-                    null,
-                    "Preencha o Código do Livro com número.",
+                    this,
+                    "O código do livro precisa ser um número.",
                     "Erro",
                     JOptionPane.ERROR_MESSAGE
             );
         }
         catch (Exception ex) {
             JOptionPane.showMessageDialog(
-                    null,
+                    this,
                     ex.getMessage(),
                     "Erro",
                     JOptionPane.ERROR_MESSAGE
@@ -514,27 +723,12 @@ public class Main extends JFrame implements ActionListener {
         }
         catch (Exception ex) {
             JOptionPane.showMessageDialog(
-                    null,
+                    this,
                     "Não foi possível salvar os dados: " + ex.getMessage(),
                     "Erro ao Salvar",
                     JOptionPane.ERROR_MESSAGE
             );
         }
-    }
-
-    private void limparCamposBusca() {
-        txCodLivro.setText("");
-        txTitulo.setText("");
-        txAutor.setText("");
-    }
-
-    private void limparCampos() {
-        txCodLivro.setText("");
-        txTitulo.setText("");
-        txAutor.setText("");
-        txAno.setText("");
-        txQtd.setText("");
-        txIdUsuario.setText("");
     }
 
     public static void main(String[] args) {
